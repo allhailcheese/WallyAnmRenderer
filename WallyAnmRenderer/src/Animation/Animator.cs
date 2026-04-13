@@ -40,7 +40,8 @@ public sealed class Animator(string brawlPath, uint key)
                 spriteWithName.SpriteName,
                 shape.ShapeId,
                 sprite.AnimScale,
-                sprite.ColorSwapDict
+                sprite.ColorSwapDict,
+                shape.ColorTransform
             );
     }
 

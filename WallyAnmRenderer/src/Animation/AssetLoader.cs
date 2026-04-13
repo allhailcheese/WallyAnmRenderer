@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using BrawlhallaAnimLib.Gfx;
+using BrawlhallaAnimLib.Math;
 using WallyAnmSpinzor;
 
 namespace WallyAnmRenderer;
@@ -90,7 +91,7 @@ public sealed class AssetLoader(string brawlPath)
         return null;
     }
 
-    public Texture2DWrapper? LoadShapeFromSwf(string filePath, string spriteName, ushort shapeId, double animScale, Dictionary<uint, uint> colorSwapDict)
+    public Texture2DWrapper? LoadShapeFromSwf(string filePath, string spriteName, ushort shapeId, double animScale, Dictionary<uint, uint> colorSwapDict, ColorTransform colorTransform)
     {
         ValueTask<SwfFileData> task = LoadSwf(filePath);
         if (!task.IsCompleted)
@@ -101,8 +102,8 @@ public sealed class AssetLoader(string brawlPath)
         _swfShapeCache.TryGetCached(spriteName, shapeId, animScale, out Texture2DWrapper? texture);
         if (texture is not null)
             return texture;
-        _swfShapeCache.LoadInThread(swf, spriteName, shapeId, animScale, colorSwapDict);
-        if (_swfShapeCache.DidError(swf, spriteName, shapeId, animScale, colorSwapDict))
+        _swfShapeCache.LoadInThread(swf, spriteName, shapeId, animScale, colorSwapDict, colorTransform);
+        if (_swfShapeCache.DidError(spriteName, shapeId, animScale))
             return new();
         return null;
     }

@@ -10,6 +10,7 @@ public sealed class Texture2DWrapper : IDisposable
 
     public Texture2D Texture { get; internal set; }
     public Transform2D Transform { get; set; }
+    public ColorTransform ColorTransform { get; set; }
     public bool OwnTexture { get; }
 
     public int Width => Texture.Width;
@@ -18,14 +19,16 @@ public sealed class Texture2DWrapper : IDisposable
     public Texture2DWrapper()
     {
         Texture = new();
-        Transform = Transform2D.ZERO;
+        Transform = Transform2D.IDENTITY;
+        ColorTransform = ColorTransform.IDENTITY;
         OwnTexture = false;
     }
 
-    public Texture2DWrapper(Texture2D texture, Transform2D transform, bool ownTexture = true)
+    public Texture2DWrapper(Texture2D texture, Transform2D transform, ColorTransform colorTransform, bool ownTexture = true)
     {
         Texture = texture;
         Transform = transform;
+        ColorTransform = colorTransform;
         OwnTexture = ownTexture;
     }
 

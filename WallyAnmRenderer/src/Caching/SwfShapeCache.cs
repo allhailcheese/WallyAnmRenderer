@@ -38,8 +38,8 @@ public sealed class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfSh
     private const int SWF_UNIT_DIVISOR = 20;
     private const double ANIM_SCALE_MULTIPLIER = 1.2;
 
-    public readonly record struct TextureInfo(SwfFileData Swf, string SpriteName, ushort ShapeId, double AnimScale, Dictionary<uint, uint> ColorSwapDict);
-    public readonly record struct ShapeData(RlImage Img, Transform2D Transform);
+    public readonly record struct TextureInfo(SwfFileData Swf, string SpriteName, ushort ShapeId, double AnimScale, Dictionary<uint, uint> ColorSwapDict, ColorTransform ColorTransform);
+    public readonly record struct ShapeData(RlImage Img, Transform2D Transform, ColorTransform ColorTransform);
 
     protected override IEqualityComparer<TextureInfo>? KeyEqualityComparer { get; } = new TextureInfoHasher();
 
@@ -47,7 +47,7 @@ public sealed class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfSh
     {
         ulong currentVersion = CacheVersion;
 
-        (SwfFileData swf, _, ushort shapeId, double animScale, Dictionary<uint, uint> colorSwapDict) = textureInfo;
+        (SwfFileData swf, _, ushort shapeId, double animScale, Dictionary<uint, uint> colorSwapDict, ColorTransform colorTransform) = textureInfo;
         animScale *= ANIM_SCALE_MULTIPLIER;
         ShapeBaseTag shape = swf.ShapeTags[shapeId];
 
@@ -75,7 +75,11 @@ public sealed class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfSh
 
         SvgSize size = new(imageW, imageH);
         SvgMatrix matrix = new(transform.ScaleX, transform.SkewY, transform.SkewX, transform.ScaleY, transform.TranslateX, transform.TranslateY);
-        SvgShapeExporter exporter = new(size, matrix);
+        /*
+        We are using the identity color transform because we apply the actual one as a shader
+        This removes the need to cache based on the color transform
+        */
+        SvgShapeExporter exporter = new(size, matrix, new());
         compiledShape.Export(exporter);
 
         if (currentVersion != CacheVersion) return default;
@@ -131,14 +135,14 @@ public sealed class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfSh
         }
 
         Transform2D.Invert(transform, out Transform2D inv);
-        return new ShapeData(rlImage2, inv);
+        return new ShapeData(rlImage2, inv, colorTransform);
     }
 
     protected override Texture2DWrapper IntermediateToValue(ShapeData shapeData)
     {
-        (RlImage img, Transform2D trans) = shapeData;
+        (RlImage img, Transform2D trans, ColorTransform colorTransform) = shapeData;
         Texture2D texture = Rl.LoadTextureFromImage(img);
-        return new(texture, trans);
+        return new(texture, trans, colorTransform);
     }
 
     protected override void InitValue(Texture2DWrapper v)
@@ -158,13 +162,18 @@ public sealed class SwfShapeCache : UploadCache<SwfShapeCache.TextureInfo, SwfSh
         texture.Dispose();
     }
 
-    public void Load(SwfFileData swf, string spriteName, ushort shapeId, double animScale, Dictionary<uint, uint> colorSwapDict) => Load(new(swf, spriteName, shapeId, animScale, colorSwapDict));
-    public void LoadInThread(SwfFileData swf, string spriteName, ushort shapeId, double animScale, Dictionary<uint, uint> colorSwapDict) => LoadInThread(new(swf, spriteName, shapeId, animScale, colorSwapDict));
-    public bool DidError(SwfFileData swf, string spriteName, ushort shapeId, double animScale, Dictionary<uint, uint> colorSwapDict) => DidError(new(swf, spriteName, shapeId, animScale, colorSwapDict));
+    public void Load(SwfFileData swf, string spriteName, ushort shapeId, double animScale, Dictionary<uint, uint> colorSwapDict, ColorTransform colorTransform) => Load(new(swf, spriteName, shapeId, animScale, colorSwapDict, colorTransform));
+    public void LoadInThread(SwfFileData swf, string spriteName, ushort shapeId, double animScale, Dictionary<uint, uint> colorSwapDict, ColorTransform colorTransform) => LoadInThread(new(swf, spriteName, shapeId, animScale, colorSwapDict, colorTransform));
+
+    public bool DidError(string spriteName, ushort shapeId, double animScale)
+    {
+        TextureInfo fake = new(null!, spriteName, shapeId, animScale, null!, default);
+        return DidError(fake);
+    }
 
     public bool TryGetCached(string spriteName, ushort shapeId, double animScale, [MaybeNullWhen(false)] out Texture2DWrapper? texture)
     {
-        TextureInfo fake = new(null!, spriteName, shapeId, animScale, null!);
+        TextureInfo fake = new(null!, spriteName, shapeId, animScale, null!, default);
         return TryGetCached(fake, out texture);
     }
 }

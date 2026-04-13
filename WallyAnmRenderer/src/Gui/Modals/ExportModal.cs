@@ -24,6 +24,7 @@ namespace WallyAnmRenderer;
 
 public sealed partial class ExportModal
 {
+    private const double SWF_UNIT_DIVISOR = 20;
     private const char FILENAME_FORMAT_FRAME_CHAR = '@';
     private static readonly XNamespace xmlns = XNamespace.Get("http://www.w3.org/2000/svg");
 
@@ -87,7 +88,7 @@ public sealed partial class ExportModal
         }
     }
 
-    private static void NamespacePathsGradients(XElement g, string ns)
+    private static void NamespacePathsGradientFills(XElement g, string ns)
     {
         IEnumerable<XElement> paths = g.Elements(xmlns + "path");
         foreach (XElement path in paths)
@@ -95,7 +96,7 @@ public sealed partial class ExportModal
             string? fill = path.Attribute("fill")?.Value;
             if (fill is null) continue;
 
-            Regex re = PathFillUrlRegex();
+            Regex re = GradientUrlRegex();
             Match match = re.Match(fill);
             if (!match.Success) continue;
 
@@ -128,23 +129,32 @@ public sealed partial class ExportModal
     private static (XDocument, Transform2D, ViewBox) ShapeToDocument(SwfFileData swf, SwfBoneSprite sprite, BoneShape shape)
     {
         Transform2D transform = shape.Transform;
+        ColorTransform colorTransform = shape.ColorTransform;
 
         ShapeBaseTag swfShape = swf.ShapeTags[shape.ShapeId];
         swfShape = SwfUtils.DeepCloneShape(swfShape);
         ColorSwapUtils.ApplyColorSwaps(swfShape, sprite.ColorSwapDict);
         SwfShape compiledShape = new(new(swfShape));
-        double shapeX = swfShape.ShapeBounds.XMin / 20.0;
-        double shapeY = swfShape.ShapeBounds.YMin / 20.0;
-        double shapeW = (swfShape.ShapeBounds.XMax - swfShape.ShapeBounds.XMin) / 20.0;
-        double shapeH = (swfShape.ShapeBounds.YMax - swfShape.ShapeBounds.YMin) / 20.0;
+        double shapeX = swfShape.ShapeBounds.XMin / SWF_UNIT_DIVISOR;
+        double shapeY = swfShape.ShapeBounds.YMin / SWF_UNIT_DIVISOR;
+        double shapeW = (swfShape.ShapeBounds.XMax - swfShape.ShapeBounds.XMin) / SWF_UNIT_DIVISOR;
+        double shapeH = (swfShape.ShapeBounds.YMax - swfShape.ShapeBounds.YMin) / SWF_UNIT_DIVISOR;
 
-        SvgShapeExporter svgExporter = new(new(shapeW, shapeH), new(1, 0, 0, 1, 0, 0));
+        SvgSize svgSize = new(shapeW, shapeH);
+        SvgMatrix svgMatrix = new(); // identity
+        SvgColorTransform svgColorTransform = new(
+            colorTransform.RedMult, colorTransform.RedAdd,
+            colorTransform.GreenMult, colorTransform.GreenAdd,
+            colorTransform.BlueMult, colorTransform.BlueAdd,
+            colorTransform.AlphaMult, colorTransform.AlphaAdd
+        );
+        SvgShapeExporter svgExporter = new(svgSize, svgMatrix, svgColorTransform);
+
         compiledShape.Export(svgExporter);
         if (sprite.Opacity != 1)
         {
             svgExporter.Document.Root!.SetAttributeValue("opacity", sprite.Opacity);
         }
-        // TODO: Tint
 
         ViewBox viewBox = new(double.NaN, double.NaN, double.NaN, double.NaN);
         (double, double)[] points = [(shapeX, shapeY), (shapeX + shapeW, shapeY), (shapeX, shapeY + shapeH), (shapeX + shapeW, shapeY + shapeH)];
@@ -249,7 +259,7 @@ public sealed partial class ExportModal
             XElement? g = main.Element(xmlns + "g");
             if (g is not null)
             {
-                NamespacePathsGradients(g, shapeId);
+                NamespacePathsGradientFills(g, shapeId);
 
                 // the 'g' element will always have an identity matrix as its transform
                 // so we can just override the transform matrix with the true one
@@ -260,11 +270,13 @@ public sealed partial class ExportModal
                 );
                 newG.SetAttributeValue("transform", transformString);
 
-                string? opacity = main.Attribute("opacity")?.Value;
-                if (opacity is not null)
+                // copy over transform
+                if (main.Attribute("opacity")?.Value is string opacity)
                     newG.SetAttributeValue("opacity", opacity);
 
-                // TODO: tint
+                // if has color transform filter, namespace it
+                if (g.Attribute("filter") is not null)
+                    newG.SetAttributeValue("filter", $"url(#{shapeId}::cxform)");
 
                 svg.Add(newG);
             }
@@ -288,6 +300,11 @@ public sealed partial class ExportModal
             if (defs is not null)
             {
                 NamespaceDefsGradients(defs, shapeId);
+
+                // namespace color transform filter
+                XElement? cxformFilter = defs.Element(xmlns + "filter");
+                cxformFilter?.SetAttributeValue("id", $"{shapeId}::cxform");
+
                 mainDefs ??= new(xmlns + "defs");
                 mainDefs.Add(defs.Nodes());
             }
@@ -640,7 +657,7 @@ public sealed partial class ExportModal
     }
 
     [GeneratedRegex(@"^url\(#(gradient[0-9]+)\)$")]
-    private static partial Regex PathFillUrlRegex();
+    private static partial Regex GradientUrlRegex();
 
     private static readonly XmlWriterSettings XML_WRITER_SETTINGS = new()
     {

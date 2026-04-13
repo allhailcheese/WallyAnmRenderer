@@ -57,7 +57,7 @@ public class TextureCache : UploadCache<TextureCache.SpriteData, (RlImage, Trans
     {
         (RlImage img, Transform2D transform) = i;
         Texture2D texture = Rl.LoadTextureFromImage(img);
-        return new(texture, transform);
+        return new(texture, transform, new());
     }
 
     protected override void InitValue(Texture2DWrapper v)

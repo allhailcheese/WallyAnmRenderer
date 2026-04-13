@@ -255,6 +255,7 @@ public sealed class Editor
                             continue;
                         }
 
+                        // TODO: color transform
                         RaylibUtils.DrawTextureWithTransform(
                             texture.Texture,
                             0, 0, texture.Width, texture.Height,
@@ -275,6 +276,7 @@ public sealed class Editor
                         continue;
                     }
 
+                    // TODO: color transform
                     RaylibUtils.DrawTextureWithTransform(
                         texture.Texture,
                         0, 0, texture.Width, texture.Height,
