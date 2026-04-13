@@ -15,10 +15,10 @@ public sealed class Animator(string brawlPath, uint key)
 
     public Loader Loader { get; } = new(brawlPath, key);
 
-    public async Task<BoneSprite[]> GetAnimationInfo(IGfxType gfx, string animation, long frame, Transform2D transform)
+    public async Task<BoneSprite[]> GetAnimationInfo(IGfxType gfx, string animation, long frame, Transform2D transform, AnimationBuilderOptions options)
     {
         List<BoneSprite> result = [];
-        await foreach (BoneSprite sprite in AnimationBuilder.BuildAnim(Loader, gfx, animation, frame, transform))
+        await foreach (BoneSprite sprite in AnimationBuilder.BuildAnim(Loader, gfx, animation, frame, transform, options))
         {
             result.Add(sprite);
         }

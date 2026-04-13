@@ -29,8 +29,9 @@ public sealed class Editor
     private Camera2D _cam;
 
     public TimeSpan Time { get; set; } = TimeSpan.FromSeconds(0);
-    private double _animationFps = 24.0;
     private bool _paused = false;
+    private double _animationFps = 24.0;
+    private bool _useLoopPoint = false;
 
     private PathPreferences PathPrefs { get; }
 
@@ -190,7 +191,9 @@ public sealed class Editor
                     long frame = (long)Math.Floor(_animationFps * Time.TotalSeconds);
                     ExportModal.Update(PathPrefs, Animator, gfxType, animation, frame, flip);
 
-                    spritesTask = Animator.GetAnimationInfo(gfxType, animation, frame, flip ? Transform2D.FLIP_X : Transform2D.IDENTITY);
+                    Transform2D flipTransform = flip ? Transform2D.FLIP_X : Transform2D.IDENTITY;
+                    AnimationBuilderOptions options = _useLoopPoint ? AnimationBuilderOptions.UseLoopPoint : 0;
+                    spritesTask = Animator.GetAnimationInfo(gfxType, animation, frame, flipTransform, options);
                     if (!spritesTask.IsCompletedSuccessfully)
                     {
                         if (spritesTask.IsFaulted && spritesTask.Exception is Exception e)
@@ -325,7 +328,7 @@ public sealed class Editor
             if (animDataTask.IsCompletedSuccessfully)
             {
                 AnimationData animData = animDataTask.Result;
-                TimeWindow.Show(animData, Time, ref _paused, ref _animationFps);
+                TimeWindow.Show(animData, Time, ref _paused, ref _animationFps, ref _useLoopPoint);
             }
         }
         if (PickerWindow.Open)

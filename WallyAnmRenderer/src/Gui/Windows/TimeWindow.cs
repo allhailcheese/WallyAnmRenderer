@@ -16,7 +16,7 @@ public sealed class TimeWindow
     public event EventHandler<long>? FrameSeeked;
     public event EventHandler<long>? FrameMove;
 
-    public void Show(AnimationData data, TimeSpan time, ref bool paused, ref double fps)
+    public void Show(AnimationData data, TimeSpan time, ref bool paused, ref double fps, ref bool useLoopPoint)
     {
         ImGui.Begin("Timeline", ref _open);
 
@@ -29,7 +29,19 @@ public sealed class TimeWindow
             int neededWidth = BASE_WIDTH + textPad * TEXT_WIDTH_MULT;
 
             long currentFrame = (long)Math.Floor(fps * time.TotalSeconds);
-            currentFrame = MathUtils.SafeMod(currentFrame, frames);
+
+            if (useLoopPoint)
+            {
+                long framesSinceLoopStart = currentFrame - loopStart;
+                long loopLength = recoveryStart - loopStart;
+                long indexInsideLoop = MathUtils.SafeMod(framesSinceLoopStart, loopLength);
+                currentFrame = loopStart + indexInsideLoop;
+            }
+            else
+            {
+                currentFrame = MathUtils.SafeMod(currentFrame, frames);
+            }
+
             for (long i = 0; i < frames; ++i)
             {
                 ImGui.PushID((nint)i);
@@ -69,6 +81,8 @@ public sealed class TimeWindow
 
         if (ImGui.Button(paused ? "Unpause" : "Pause"))
             paused = !paused;
+
+        ImGui.Checkbox("Use loop point", ref useLoopPoint);
 
         if (ImGui.Button("Prev frame"))
             FrameMove?.Invoke(this, -1);

@@ -66,6 +66,7 @@ public sealed partial class ExportModal
     private double _animScale = 4;
 
     private bool _flip = false;
+    private readonly AnimationBuilderOptions _options = 0;
 
     private bool _shouldOpen;
     private bool _open = false;
@@ -221,14 +222,15 @@ public sealed partial class ExportModal
                 yield return result;
     }
 
-    private static async ValueTask<(XDocument, ViewBox)> ExportAnimation(Loader loader, IGfxType gfx, string animation, double animScale, long frame, bool flip)
+    private static async ValueTask<(XDocument, ViewBox)> ExportAnimation(Loader loader, IGfxType gfx, string animation, double animScale, long frame, bool flip, AnimationBuilderOptions options)
     {
         GfxType gfxClone = new(gfx)
         {
             AnimScale = animScale
         };
 
-        IAsyncEnumerable<BoneSprite> sprites = AnimationBuilder.BuildAnim(loader, gfxClone, animation, frame, flip ? Transform2D.FLIP_X : Transform2D.IDENTITY);
+        Transform2D flipTransform = flip ? Transform2D.FLIP_X : Transform2D.IDENTITY;
+        IAsyncEnumerable<BoneSprite> sprites = AnimationBuilder.BuildAnim(loader, gfxClone, animation, frame, flipTransform, options);
 
         ViewBox viewBox = new(double.NaN, double.NaN, double.NaN, double.NaN);
         List<(XDocument, Transform2D)> svgList = [];
@@ -470,7 +472,7 @@ public sealed partial class ExportModal
         if (Path.GetExtension(path) != extension)
             path = Path.ChangeExtension(path, extension);
 
-        (XDocument document, _) = await ExportAnimation(loader, gfx, animation, _animScale, _startFrame, _flip);
+        (XDocument document, _) = await ExportAnimation(loader, gfx, animation, _animScale, _startFrame, _flip, _options);
         await ExportDocument(path, document, cancellationToken);
     }
 
@@ -509,7 +511,7 @@ public sealed partial class ExportModal
             if (Path.GetExtension(path) != extension)
                 path = Path.ChangeExtension(path, extension);
 
-            animationTasks.Add((path, ExportAnimation(loader, gfx, animation, _animScale, frame, _flip).AsTask()));
+            animationTasks.Add((path, ExportAnimation(loader, gfx, animation, _animScale, frame, _flip, _options).AsTask()));
         }
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -591,7 +593,7 @@ public sealed partial class ExportModal
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            animationTasks.Add(ExportAnimation(loader, gfx, animation, _animScale, frame, _flip).AsTask());
+            animationTasks.Add(ExportAnimation(loader, gfx, animation, _animScale, frame, _flip, _options).AsTask());
         }
 
         cancellationToken.ThrowIfCancellationRequested();
