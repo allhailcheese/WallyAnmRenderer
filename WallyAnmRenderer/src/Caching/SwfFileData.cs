@@ -40,29 +40,18 @@ public sealed class SwfFileData
         PopulateSpriteADict(swf, ctoken);
         ctoken.ThrowIfCancellationRequested();
 
-        SymbolClassTag? symbolClass = null;
-
         //find symbol class
-        foreach (SwfTagBase tag in swf.Swf.Tags)
-        {
-            if (tag is SymbolClassTag symbolClassTag)
-            {
-                symbolClass = symbolClassTag;
-                break;
-            }
-        }
+        SymbolClassTag? symbolClass = swf.Swf.Tags.OfType<SymbolClassTag>().FirstOrDefault();
+
+        // if there's no symbol class, that means the swf is empty
         if (symbolClass is null)
-        {
-            throw new Exception("No symbol class in swf");
-        }
+            return swf;
 
         foreach (SwfSymbolReference reference in symbolClass.References)
         {
             swf.SymbolClass[reference.SymbolName] = reference.SymbolID;
             swf.ReverseSymbolClass[reference.SymbolID] = reference.SymbolName;
         }
-
-        ctoken.ThrowIfCancellationRequested();
 
         foreach (SwfTagBase tag in swf.Swf.Tags)
         {
