@@ -862,7 +862,6 @@ public sealed class PickerWindow
 
         uint ogCrateColorA = gfxInfo.CrateColorA;
         gfxInfo.CrateColorA = ImGuiEx.ColorPicker3Hex("##outer", gfxInfo.CrateColorA);
-        gfxInfo.CrateColorA = ImGuiEx.ColorPicker3Hex("##outer", gfxInfo.CrateColorA);
         ImGui.SameLine();
         ImGui.Text("Outer color");
 
