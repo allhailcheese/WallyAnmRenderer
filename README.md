@@ -76,18 +76,18 @@ run the project (inside the WallyAnmRenderer folder created by git clone):
 
 This list includes the dependencies from submodules.
 
-- Magick.NET (14.1.1.0) - Library for image manipulation. Used for svg rasterization.
+- Magick.NET (14.12.0) - Library for image manipulation. Used for svg rasterization.
 
 - NativeFileDialogSharp (0.5.0) - C# bindings for nativefiledialog, a C library for opening the platform's default file explorer dialog.
 
-- Raylib-cs (7.0.1) - C# bindings for Raylib, a C rendering library.
+- Raylib-cs (7.0.2) - C# bindings for Raylib, a C rendering library.
 
 - ImGui.NET (1.91.6.1) - C# bindings for ImGui, a C++ ui library.
 
-- rlImgui-cs (3.1.0) - C# library for bridging between Raylib-cs and ImGui.NET.
+- rlImgui-cs (3.2.0) - C# library for bridging between Raylib-cs and ImGui.NET.
 
 - SwfLib (1.0.5) - C# library for parsing .swf files.
 
 - OneOf (3.0.271) - C# tagged union library.
 
-- Sep (0.10.0) - C# csv parsing library.
+- Sep (0.12.3) - C# csv parsing library.
