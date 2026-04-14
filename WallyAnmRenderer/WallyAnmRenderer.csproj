@@ -33,10 +33,10 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Sep" Version="0.10.0" />
-    <PackageReference Include="Magick.NET-Q8-x64" Version="14.11.1" />
-    <PackageReference Include="rlImgui-cs" Version="3.1.0" />
-    <PackageReference Include="Raylib-cs" Version="7.0.1" />
+    <PackageReference Include="Sep" Version="0.12.3" />
+    <PackageReference Include="Magick.NET-Q8-x64" Version="14.12.0" />
+    <PackageReference Include="rlImgui-cs" Version="3.2.0" />
+    <PackageReference Include="Raylib-cs" Version="7.0.2" />
     <PackageReference Include="NativeFileDialogSharp" Version="0.5.0" />
   </ItemGroup>
 

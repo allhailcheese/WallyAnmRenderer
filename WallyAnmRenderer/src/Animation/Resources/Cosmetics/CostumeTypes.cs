@@ -25,7 +25,7 @@ public sealed class CostumeTypes : ICsvReader
 
             string displayNameKey = row["DisplayNameKey"].ToString();
             string ownerHero = row["OwnerHero"].ToString();
-            uint costumeIndex = uint.Parse(row["CostumeIndex"].ToString());
+            uint costumeIndex = row["CostumeIndex"].Parse<uint>();
             _infos[costumeName] = new(costumeName, displayNameKey, ownerHero, costumeIndex);
 
             _gfx[costumeName] = new(adapter);

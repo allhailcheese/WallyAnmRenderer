@@ -24,9 +24,9 @@ public sealed class AvatarTypes : ICsvReader
             _rows[avatarName] = adapter;
 
             string displayNameKey = row["DisplayNameKey"].ToString();
-            _ = uint.TryParse(row["AvatarID"].ToString(), out uint avatarId);
-            _ = uint.TryParse(row["InventoryOrderID"].ToString(), out uint orderId);
-            _ = uint.TryParse(row["InventorySubOrderID"].ToString(), out uint subOrderId);
+            uint avatarId = row["AvatarID"].TryParse<uint>() ?? 0;
+            uint orderId = row["InventoryOrderID"].TryParse<uint>() ?? 0;
+            uint subOrderId = row["InventorySubOrderID"].TryParse<uint>() ?? 0;
 
             _infos[avatarName] = new(avatarName, avatarId, displayNameKey, orderId, subOrderId);
 
