@@ -229,6 +229,7 @@ public sealed class AnmWindow
                     {
                         foreach ((_, DefineSpriteTag spriteTag) in swf.SpriteTags)
                         {
+                            // TODO: we don't support showing nameless sprites
                             if (!swf.ReverseSymbolClass.TryGetValue(spriteTag.SpriteID, out string? spriteName))
                                 continue;
                             if (!spriteName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))

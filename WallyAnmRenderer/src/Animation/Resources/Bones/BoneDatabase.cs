@@ -13,6 +13,7 @@ using BrawlhallaAnimLib.Bones;
 
 namespace WallyAnmRenderer;
 
+// bmg why is this shit not in an xml file
 public class BoneDatabase : IBoneDatabase
 {
     private BoneDatabase() { }

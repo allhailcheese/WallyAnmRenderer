@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,17 +39,15 @@ public sealed class SwfFileData
         PopulateSpriteADict(swf, ctoken);
         ctoken.ThrowIfCancellationRequested();
 
-        //find symbol class
+        // find symbol class
         SymbolClassTag? symbolClass = swf.Swf.Tags.OfType<SymbolClassTag>().FirstOrDefault();
-
-        // if there's no symbol class, that means the swf is empty
-        if (symbolClass is null)
-            return swf;
-
-        foreach (SwfSymbolReference reference in symbolClass.References)
+        if (symbolClass is not null)
         {
-            swf.SymbolClass[reference.SymbolName] = reference.SymbolID;
-            swf.ReverseSymbolClass[reference.SymbolID] = reference.SymbolName;
+            foreach (SwfSymbolReference reference in symbolClass.References)
+            {
+                swf.SymbolClass[reference.SymbolName] = reference.SymbolID;
+                swf.ReverseSymbolClass[reference.SymbolID] = reference.SymbolName;
+            }
         }
 
         foreach (SwfTagBase tag in swf.Swf.Tags)

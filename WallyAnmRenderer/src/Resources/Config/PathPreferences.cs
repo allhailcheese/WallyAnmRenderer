@@ -8,7 +8,7 @@ namespace WallyAnmRenderer;
 
 public class PathPreferences
 {
-    public const string APPDATA_DIR_NAME = "WallyAnmRenderer";
+    public const string APPDATA_DIR_NAME = nameof(WallyAnmRenderer);
     public const string FILE_NAME = "PathPreferences.xml";
 
     public event EventHandler<string>? BrawlhallaPathChanged;
