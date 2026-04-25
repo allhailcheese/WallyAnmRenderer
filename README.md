@@ -31,9 +31,8 @@
 * Correct timing for attack animations.
 
 #### Unsupported swf features:
-* ColorTransform (rarely used)
+* ColorTransform (supported in export, but not in rendering)
 * Bitmap fill styles (rarely used)
-* LineStyle2-exclusive features (not used by the game(?))
 
 ## Download
 Download the latest release [here](https://github.com/eyalzus12/WallyAnmRenderer/releases/latest)
