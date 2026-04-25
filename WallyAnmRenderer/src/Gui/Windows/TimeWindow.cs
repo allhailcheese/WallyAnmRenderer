@@ -102,7 +102,7 @@ public sealed class TimeWindow
         ImGui.Text($"Recovery start: {recoveryStart}");
         ImGui.SetItemTooltip("Loop end");
         ImGui.Text($"Free start: {data.FreeStart}");
-        ImGui.SetItemTooltip("UNUSED (always equal to frame count)");
+        ImGui.SetItemTooltip("IDK. Usually (but not always) equal to frame count.");
         ImGui.Text($"Run end: [{string.Join(", ", data.RunEndFrames)}]");
         ImGui.SetItemTooltip("UNUSED (always empty)");
 
