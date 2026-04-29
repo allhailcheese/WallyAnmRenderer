@@ -26,7 +26,8 @@ public sealed partial class ExportModal
 {
     private const double SWF_UNIT_DIVISOR = 20;
     private const char FILENAME_FORMAT_FRAME_CHAR = '@';
-    private static readonly XNamespace xmlns = XNamespace.Get("http://www.w3.org/2000/svg");
+    private static readonly XNamespace svgns = XNamespace.Get("http://www.w3.org/2000/svg");
+    private static readonly XNamespace xlink = XNamespace.Get("http://www.w3.org/1999/xlink");
 
     public const string NAME = "Export animation";
 
@@ -79,8 +80,8 @@ public sealed partial class ExportModal
 
     private static void NamespaceDefsGradients(XElement defs, string ns)
     {
-        IEnumerable<XElement> linearGradients = defs.Elements(xmlns + "linearGradient");
-        IEnumerable<XElement> radialGradients = defs.Elements(xmlns + "radialGradient");
+        IEnumerable<XElement> linearGradients = defs.Elements(svgns + "linearGradient");
+        IEnumerable<XElement> radialGradients = defs.Elements(svgns + "radialGradient");
         foreach (XElement gradient in linearGradients.Concat(radialGradients))
         {
             string? id = gradient.Attribute("id")?.Value;
@@ -91,7 +92,7 @@ public sealed partial class ExportModal
 
     private static void NamespacePathsGradientFills(XElement g, string ns)
     {
-        IEnumerable<XElement> paths = g.Elements(xmlns + "path");
+        IEnumerable<XElement> paths = g.Elements(svgns + "path");
         foreach (XElement path in paths)
         {
             string? fill = path.Attribute("fill")?.Value;
@@ -184,12 +185,13 @@ public sealed partial class ExportModal
             double offX = bitmapSprite.SpriteData.XOffset;
             double offY = bitmapSprite.SpriteData.YOffset;
 
-            XElement imageElement = new(xmlns + "image");
+            XElement imageElement = new(svgns + "image");
             imageElement.SetAttributeValue("x", bitmapSprite.SpriteData.XOffset);
             imageElement.SetAttributeValue("y", bitmapSprite.SpriteData.YOffset);
             imageElement.SetAttributeValue("width", bitmapSprite.SpriteData.Width);
             imageElement.SetAttributeValue("height", bitmapSprite.SpriteData.Height);
-            XElement svg = new(xmlns + "svg", imageElement);
+            XElement svg = new(svgns + "svg", imageElement);
+            svg.SetAttributeValue(XNamespace.Xmlns + "xlink", xlink.NamespaceName);
             svg.SetAttributeValue("width", bitmapSprite.SpriteData.Width);
             svg.SetAttributeValue("height", bitmapSprite.SpriteData.Height);
             XDocument document = new(new XDeclaration("1.0", "UTF-8", "no"), svg);
@@ -209,7 +211,8 @@ public sealed partial class ExportModal
 
             byte[] bytes = await File.ReadAllBytesAsync(path);
             string base64 = Convert.ToBase64String(bytes);
-            imageElement.SetAttributeValue("href", $"data:{mimeType};base64,{base64}");
+            string href = $"data:{mimeType};base64,{base64}";
+            imageElement.SetAttributeValue(xlink + "href", href);
 
             yield return (document, sprite.Transform, viewBox);
         }
@@ -244,7 +247,8 @@ public sealed partial class ExportModal
 
         // merge the svgs
 
-        XElement svg = new(xmlns + "svg");
+        XElement svg = new(svgns + "svg");
+        svg.SetAttributeValue(XNamespace.Xmlns + "xlink", xlink.NamespaceName);
         svg.SetAttributeValue("width", viewBox.Width);
         svg.SetAttributeValue("height", viewBox.Height);
         svg.SetAttributeValue("viewBox", $"{viewBox.MinX} {viewBox.MinY} {viewBox.Width} {viewBox.Height}");
@@ -258,7 +262,7 @@ public sealed partial class ExportModal
 
             string shapeId = $"shape{index++}";
 
-            XElement? g = main.Element(xmlns + "g");
+            XElement? g = main.Element(svgns + "g");
             if (g is not null)
             {
                 NamespacePathsGradientFills(g, shapeId);
@@ -283,7 +287,7 @@ public sealed partial class ExportModal
                 svg.Add(newG);
             }
 
-            XElement? image = main.Element(xmlns + "image");
+            XElement? image = main.Element(svgns + "image");
             if (image is not null)
             {
                 XElement newImage = new(image);
@@ -298,16 +302,16 @@ public sealed partial class ExportModal
                 svg.Add(newImage);
             }
 
-            XElement? defs = main.Element(xmlns + "defs");
+            XElement? defs = main.Element(svgns + "defs");
             if (defs is not null)
             {
                 NamespaceDefsGradients(defs, shapeId);
 
                 // namespace color transform filter
-                XElement? cxformFilter = defs.Element(xmlns + "filter");
+                XElement? cxformFilter = defs.Element(svgns + "filter");
                 cxformFilter?.SetAttributeValue("id", $"{shapeId}::cxform");
 
-                mainDefs ??= new(xmlns + "defs");
+                mainDefs ??= new(svgns + "defs");
                 mainDefs.Add(defs.Nodes());
             }
         }
@@ -533,7 +537,8 @@ public sealed partial class ExportModal
                 viewBox.ExtendWith(viewBox2);
             foreach ((_, XDocument document, _) in documents)
             {
-                XElement svg = document.Element(xmlns + "svg")!;
+                XElement svg = document.Element(svgns + "svg")!;
+                svg.SetAttributeValue(XNamespace.Xmlns + "xlink", xlink.NamespaceName);
                 svg.SetAttributeValue("width", viewBox.Width);
                 svg.SetAttributeValue("height", viewBox.Height);
                 svg.SetAttributeValue("viewBox", $"{viewBox.MinX} {viewBox.MinY} {viewBox.Width} {viewBox.Height}");
@@ -606,7 +611,8 @@ public sealed partial class ExportModal
             viewBox.ExtendWith(viewBox2);
         foreach ((XDocument document, _) in documents)
         {
-            XElement svg = document.Element(xmlns + "svg")!;
+            XElement svg = document.Element(svgns + "svg")!;
+            svg.SetAttributeValue(XNamespace.Xmlns + "xlink", xlink.NamespaceName);
             svg.SetAttributeValue("width", viewBox.Width);
             svg.SetAttributeValue("height", viewBox.Height);
             svg.SetAttributeValue("viewBox", $"{viewBox.MinX} {viewBox.MinY} {viewBox.Width} {viewBox.Height}");
