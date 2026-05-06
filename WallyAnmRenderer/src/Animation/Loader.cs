@@ -11,6 +11,7 @@ using BrawlhallaAnimLib.Anm;
 using BrawlhallaLangReader;
 using WallyAnmSpinzor;
 using BrawlhallaAnimLib.Gfx;
+using SwfLib.Tags.ShapeMorphingTags;
 
 namespace WallyAnmRenderer;
 
@@ -168,6 +169,8 @@ public sealed class Loader : ILoader
             return sprite;
         if (swf.ShapeTags.TryGetValue(tagId, out ShapeBaseTag? shape))
             return shape;
+        if (swf.MorphShapeTags.TryGetValue(tagId, out ShapeMorphingBaseTag? morphShape))
+            return morphShape;
         if (swf.TextTags.TryGetValue(tagId, out DefineTextBaseTag? text))
             return text;
         if (swf.EditTextTags.TryGetValue(tagId, out DefineEditTextTag? editText))

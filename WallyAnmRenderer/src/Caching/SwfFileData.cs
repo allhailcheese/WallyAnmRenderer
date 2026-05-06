@@ -12,6 +12,7 @@ using SwfLib.Tags;
 using SwfLib.Tags.ActionsTags;
 using SwfLib.Tags.BitmapTags;
 using SwfLib.Tags.ControlTags;
+using SwfLib.Tags.ShapeMorphingTags;
 using SwfLib.Tags.ShapeTags;
 using SwfLib.Tags.TextTags;
 
@@ -24,6 +25,7 @@ public sealed class SwfFileData
     public Dictionary<ushort, string> ReverseSymbolClass { get; } = [];
     public Dictionary<ushort, DefineSpriteTag> SpriteTags { get; } = [];
     public Dictionary<ushort, ShapeBaseTag> ShapeTags { get; } = [];
+    public Dictionary<ushort, ShapeMorphingBaseTag> MorphShapeTags { get; } = [];
     public Dictionary<ushort, DefineTextBaseTag> TextTags { get; } = [];
     public Dictionary<ushort, DefineEditTextTag> EditTextTags { get; } = [];
     public Dictionary<ushort, BitmapBaseTag> BitmapTags { get; } = [];
@@ -59,6 +61,14 @@ public sealed class SwfFileData
             else if (tag is ShapeBaseTag shape)
             {
                 swf.ShapeTags[shape.ShapeID] = shape;
+            }
+            else if (tag is DefineMorphShapeTag morphShapeTag)
+            {
+                swf.MorphShapeTags[morphShapeTag.CharacterID] = morphShapeTag;
+            }
+            else if (tag is DefineMorphShape2Tag morphShape2Tag)
+            {
+                swf.MorphShapeTags[morphShape2Tag.CharacterID] = morphShape2Tag;
             }
             else if (tag is DefineTextBaseTag text)
             {
@@ -187,7 +197,5 @@ Tags with a SpriteID:
 
 So we are currently missing:
 * DefineScalingGridTag
-* DefineMorphShapeTag
-* DefineMorphShape2Tag
 * DoInitActionTag
 */
