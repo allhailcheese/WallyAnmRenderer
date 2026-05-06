@@ -70,9 +70,9 @@ public sealed class AnimationInfoWindow
                         ImGui.Text($"SetName: {bitmapSprite.SpriteData.SetName}");
                         ImGui.Text($"File: {bitmapSprite.SpriteData.File}");
                     }
-                    Transform2D transform = sprite.Transform;
 
                     ImGui.SeparatorText("Transform");
+                    Transform2D transform = sprite.Transform;
                     ImGui.Text($"X: {transform.TranslateX}");
                     ImGui.Text($"Y: {transform.TranslateY}");
                     ImGui.Text($"ScaleX: {transform.ScaleX}");
@@ -82,6 +82,17 @@ public sealed class AnimationInfoWindow
 
                     ImGui.SeparatorText("Effects");
                     ImGui.Text($"Opacity: {sprite.Opacity}");
+
+                    // rare, so only show specific information
+                    ColorTransform cxform = sprite.ColorTransform;
+                    if (cxform.RedMult != 1) ImGui.Text($"RedMult: {cxform.RedMult}");
+                    if (cxform.RedAdd != 0) ImGui.Text($"RedAdd: {cxform.RedAdd}");
+                    if (cxform.GreenMult != 1) ImGui.Text($"GreenMult: {cxform.GreenMult}");
+                    if (cxform.GreenAdd != 0) ImGui.Text($"GreenAdd: {cxform.GreenAdd}");
+                    if (cxform.BlueMult != 1) ImGui.Text($"BlueMult: {cxform.BlueMult}");
+                    if (cxform.BlueAdd != 0) ImGui.Text($"BlueAdd: {cxform.BlueAdd}");
+                    if (cxform.AlphaMult != 1) ImGui.Text($"AlphaMult: {cxform.AlphaMult}");
+                    if (cxform.AlphaAdd != 0) ImGui.Text($"AlphaAdd: {cxform.AlphaAdd}");
 
                     ImGui.TreePop();
                 }
