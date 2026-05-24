@@ -61,6 +61,7 @@ public sealed partial class ExportModal
 
     private string _fileNameFormat = $"Exported animation {FILENAME_FORMAT_FRAME_CHAR}";
 
+    private long _frame = -1;
     private long _startFrame = -1;
     private long _endFrame = -1;
 
@@ -72,6 +73,8 @@ public sealed partial class ExportModal
     private bool _shouldOpen;
     private bool _open = false;
     public void Open() => _shouldOpen = true;
+
+    private Task<AnimationData>? _animationDataTask = null;
 
     private CancellationTokenSource _cancellationSource = new();
 
@@ -332,8 +335,10 @@ public sealed partial class ExportModal
             _open = true;
             _errors.Clear();
 
-            _startFrame = frame;
-            _endFrame = frame;
+            _frame = frame;
+            _startFrame = 0;
+            _endFrame = 0;
+            _animationDataTask = animator?.GetAnimData(gfx.AnimFile, gfx.AnimClass, animation).AsTask();
             _flip = flip;
         }
 
@@ -344,6 +349,12 @@ public sealed partial class ExportModal
             ImGui.Text("Animation is not loaded");
             ImGui.EndPopup();
             return;
+        }
+
+        if (_animationDataTask is not null && _animationDataTask.IsCompletedSuccessfully)
+        {
+            _endFrame = _animationDataTask.Result.FrameCount;
+            _animationDataTask = null;
         }
 
         int currentExportMode = (int)_exportMode;
@@ -367,19 +378,20 @@ public sealed partial class ExportModal
         switch (_exportMode)
         {
             case ExportModeEnum.SingleFrame:
-                if (ImGuiEx.InputLong("Frame", ref _startFrame))
-                    _endFrame = _startFrame;
+                ImGuiEx.InputLong("Frame", ref _frame);
                 break;
             case ExportModeEnum.MultiFrame:
                 ImGuiEx.InputLong("Start Frame", ref _startFrame);
-                ImGuiEx.InputLong("End Frame", ref _endFrame);
+                if (ImGuiEx.InputLong("End Frame", ref _endFrame))
+                    _animationDataTask = null;
                 ImGui.Text("@ Will be replaced with the frame number.");
                 ImGui.InputText("File name format", ref _fileNameFormat, 256);
                 ImGui.Checkbox("Size canvas such that all frames fit", ref _canvasContain);
                 break;
             case ExportModeEnum.Animated:
                 ImGuiEx.InputLong("Start Frame", ref _startFrame);
-                ImGuiEx.InputLong("End Frame", ref _endFrame);
+                if (ImGuiEx.InputLong("End Frame", ref _endFrame))
+                    _animationDataTask = null;
                 // canvas contain always true for animated
                 break;
         }
@@ -476,7 +488,7 @@ public sealed partial class ExportModal
         if (Path.GetExtension(path) != extension)
             path = Path.ChangeExtension(path, extension);
 
-        (XDocument document, _) = await ExportAnimation(loader, gfx, animation, _animScale, _startFrame, _flip, _options);
+        (XDocument document, _) = await ExportAnimation(loader, gfx, animation, _animScale, _frame, _flip, _options);
         await ExportDocument(path, document, cancellationToken);
     }
 

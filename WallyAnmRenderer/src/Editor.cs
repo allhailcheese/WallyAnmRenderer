@@ -324,7 +324,7 @@ public sealed class Editor
             AnmWindow.Show(PathPrefs.BrawlhallaPath, Animator?.Loader.AssetLoader, GfxInfo);
         if (TimeWindow.Open && Animator is not null && GfxInfo.AnimationPicked)
         {
-            ValueTask<AnimationData> animDataTask = Animator.GetAnimData(GfxInfo);
+            ValueTask<AnimationData> animDataTask = Animator.GetAnimData(GfxInfo.AnimFile, GfxInfo.AnimClass, GfxInfo.Animation);
             if (animDataTask.IsCompletedSuccessfully)
             {
                 AnimationData animData = animDataTask.Result;
