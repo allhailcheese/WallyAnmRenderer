@@ -16,26 +16,30 @@
   * Insignia
   * Avatar
   * Emoji
-* A full implementation of the game's animation system.
+  * End of match fanfare
+  * Horde enemies
+  * Volleybrawl ball colors
+  * Bubble tag bubble colors
+* A full implementation of the game's animation system. Including support for asymmetry.
 * Pause, frame step, and seeing exact animation timeline.
+* Support for animation loop points.
 * Listing the sprites and their data.
 * Seeing both the internal and the ingame name of various items.
 * Creating custom colors.
-* Exporting as svg or png.
+* Exporting an animation frame as svg or png.
 * Exporting an animation as a seuquence of svg or png images.
 * Exporting an animation as gif, webp, or apng
 
 #### Planned features:
 * Bulk exporting of many animations.
-* Support for animation loop points.
-* Correct timing for attack animations.
+* Correct timing for attack animations (harder than it sounds).
 
 #### Unsupported swf features:
-* ColorTransform (supported in export, but not in rendering)
-* Bitmap fill styles (rarely used)
+* Color transforms are only supported on export, not during rendering. This is only used for the brawlball goal.
+* Bitmap fill styles (rarely used in the game, but used by some mods to get around color swapping limitations).
 
 ## Download
-Download the latest release [here](https://github.com/eyalzus12/WallyAnmRenderer/releases/latest)
+Download the latest release [here](https://github.com/allhailcheese/WallyAnmRenderer/releases/latest)
 
 If the program doesn't launch on windows, you may need to install the [latest Visual C++ Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170)
 
@@ -45,7 +49,7 @@ make sure you have _git_ installed.
 
 download the code:
 
-`git clone --recurse-submodules https://github.com/eyalzus12/WallyAnmRenderer.git`
+`git clone --recurse-submodules https://github.com/allhailcheese/WallyAnmRenderer.git`
 
 run the project (inside the WallyAnmRenderer folder created by git clone):
 
