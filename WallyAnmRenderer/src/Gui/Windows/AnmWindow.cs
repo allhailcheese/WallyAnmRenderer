@@ -184,13 +184,13 @@ public sealed class AnmWindow
         ImGui.InputText("Filter files", ref _swfFileFilter, 256);
         foreach (string absolutePath in baseFiles.Concat(bonesFiles))
         {
-            string fileName = Path.GetRelativePath(brawlPath, absolutePath);
-            string displayName = Path.GetFileName(fileName);
+            string animFile = Path.GetRelativePath(brawlPath, absolutePath);
+            string displayName = Path.GetFileName(animFile);
             if (!displayName.Contains(_swfFileFilter, StringComparison.CurrentCultureIgnoreCase))
                 continue;
             string relativePath = Path.GetRelativePath(brawlPath, absolutePath);
 
-            ImGui.PushID(fileName);
+            ImGui.PushID(animFile);
             if (assetLoader.IsSwfLoading(relativePath))
             {
                 ImGui.Text(displayName);
@@ -219,33 +219,43 @@ public sealed class AnmWindow
                 {
                     unloadButton();
 
-                    string filter = _swfFilterState.GetValueOrDefault(fileName, "");
+                    string filter = _swfFilterState.GetValueOrDefault(animFile, "");
                     if (ImGui.InputText("Filter sprites", ref filter, 256))
                     {
-                        _swfFilterState[fileName] = filter;
+                        _swfFilterState[animFile] = filter;
                     }
 
                     if (ImGui.BeginListBox(""))
                     {
                         foreach ((_, DefineSpriteTag spriteTag) in swf.SpriteTags)
                         {
-                            // TODO: we don't support showing nameless sprites
-                            if (!swf.ReverseSymbolClass.TryGetValue(spriteTag.SpriteID, out string? spriteName))
-                                continue;
+                            string spriteName;
+                            string animClass;
+                            if (swf.ReverseSymbolClass.TryGetValue(spriteTag.SpriteID, out string? symbolName))
+                            {
+                                animClass = symbolName;
+                                spriteName = spriteTag.SpriteID + " " + symbolName;
+                            }
+                            else
+                            {
+                                animClass = Loader.SPRITE_ID_PREFIX + spriteTag.SpriteID;
+                                spriteName = spriteTag.SpriteID.ToString();
+                            }
+
                             if (!spriteName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                                 continue;
 
                             bool selected =
-                                fileName == info.AnimFile &&
-                                spriteName == info.AnimClass &&
+                                animFile == info.AnimFile &&
+                                animClass == info.AnimClass &&
                                 string.IsNullOrEmpty(info.Animation);
 
                             if (selected) ImGui.PushStyleColor(ImGuiCol.Text, Colors.SELECTED_OPTION);
                             if (ImGui.Selectable(spriteName, selected))
                             {
                                 info.SourceFilePath = relativePath;
-                                info.AnimFile = fileName;
-                                info.AnimClass = spriteName;
+                                info.AnimFile = animFile;
+                                info.AnimClass = animClass;
                                 info.Animation = "";
                             }
                             if (selected) ImGui.PopStyleColor();

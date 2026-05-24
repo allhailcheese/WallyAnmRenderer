@@ -17,6 +17,8 @@ namespace WallyAnmRenderer;
 
 public sealed class Loader : ILoader
 {
+    public const string SPRITE_ID_PREFIX = "\uffff";
+
     private CancellationTokenSource? _loadSwzToken = null;
     private CancellationTokenSource? _loadLangToken = null;
     private Task<BoneDatabase>? _boneDatabase = null;
@@ -156,6 +158,10 @@ public sealed class Loader : ILoader
 
     public async ValueTask<ushort?> GetSymbolId(string swfPath, string symbolName)
     {
+        // hack to be able to store a sprite id in the anim class
+        if (symbolName.StartsWith(SPRITE_ID_PREFIX))
+            return ushort.TryParse(symbolName[SPRITE_ID_PREFIX.Length..], out ushort result) ? result : null;
+
         SwfFileData swf = await AssetLoader.LoadSwf(swfPath);
         if (swf.SymbolClass.TryGetValue(symbolName, out ushort symbolId))
             return symbolId;
