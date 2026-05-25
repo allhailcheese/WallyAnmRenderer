@@ -12,7 +12,7 @@ public sealed class PickerWindow
 {
     private static readonly string[] ITEM_TEAM_OPTIONS = ["None", "Red", "Blue"];
     private static readonly string[] PODIUM_TEAM_OPTIONS = ["None", "Red", "Blue"];
-    private static readonly string[] BUBBLE_TEAM_OPTIONS = ["None", "Red", "Blue"];
+    private static readonly string[] BUBBLE_TEAM_OPTIONS = ["Red", "Blue"];
     private static readonly string[] HORDE_TYPE_OPTIONS = ["Standard", "Nightmare"];
     private static readonly string[] VOLLEY_BALL_COLOR_OPTIONS = ["None", "White", "Red", "Blue"];
     private const string DEBUG_COLOR_TEXT = "DEBUG (not a real color scheme)";
