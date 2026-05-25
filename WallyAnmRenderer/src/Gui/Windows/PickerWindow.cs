@@ -115,7 +115,7 @@ public sealed class PickerWindow
             ImGui.TreePop();
         }
 
-        if (ImGui.TreeNode("Mouth/Eye Overrides"))
+        if (ImGui.TreeNode("Facial Expression Overrides"))
         {
             OverridesSection(gfxInfo);
             ImGui.TreePop();
@@ -879,26 +879,38 @@ public sealed class PickerWindow
 
     private static void OverridesSection(GfxInfo gfxInfo)
     {
-        ImGui.Text("Mouth override");
+        ImGui.SeparatorText("Mouth override");
         ImGui.PushID("mouth");
         PickerListBox<GfxMouthOverride> mouthPicker = new()
         {
             Options = Enum.GetValues<GfxMouthOverride>(),
-            OptionToString = EnumStringDicts.GetMouthOverridesString,
+            OptionToString = GfxOverridesToString.MouthOverrideToString,
             OnSelect = (mouthOverride) => gfxInfo.MouthOverride = mouthOverride,
         };
         mouthPicker.Show(gfxInfo.MouthOverride);
         ImGui.PopID();
 
-        ImGui.Text("Eyes override");
+        ImGui.SeparatorText("Eyes override");
         ImGui.PushID("eyes");
         PickerListBox<GfxEyesOverride> eyesPicker = new()
         {
             Options = Enum.GetValues<GfxEyesOverride>(),
-            OptionToString = EnumStringDicts.GetEyesOverridesString,
+            OptionToString = GfxOverridesToString.EyesOverrideToString,
             OnSelect = (eyesOverride) => gfxInfo.EyesOverride = eyesOverride,
         };
         eyesPicker.Show(gfxInfo.EyesOverride);
+        ImGui.PopID();
+
+        ImGui.SeparatorText("Accent override");
+        ImGui.TextColored(Colors.NOTE_TEXT, "Affects things like Feline Fait's cat");
+        ImGui.PushID("accent");
+        PickerListBox<GfxAccentOverride> accentPicker = new()
+        {
+            Options = Enum.GetValues<GfxAccentOverride>(),
+            OptionToString = GfxOverridesToString.AccentOverrideToString,
+            OnSelect = (accentOverride) => gfxInfo.AccentOverride = accentOverride,
+        };
+        accentPicker.Show(gfxInfo.AccentOverride);
         ImGui.PopID();
     }
 

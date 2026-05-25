@@ -45,6 +45,7 @@ public sealed class GfxInfo : IGfxInfo
 
     public GfxMouthOverride MouthOverride { get; set; } = GfxMouthOverride.NoChange;
     public GfxEyesOverride EyesOverride { get; set; } = GfxEyesOverride.NoChange;
+    public GfxAccentOverride AccentOverride { get; set; } = GfxAccentOverride.NoChange;
 
     [MemberNotNullWhen(true, nameof(AnimClass))]
     [MemberNotNullWhen(true, nameof(AnimFile))]
@@ -291,8 +292,17 @@ public sealed class GfxInfo : IGfxInfo
             gfx = AddColorSwaps(gfx, [CrateColorUtils.GetCrateBColorSwap(CrateColorB)]);
         }
 
+        /*
+        The image render tool does not do R overrides, but that's probably a bug.
+        We could allow picking them separately, but there's not really a use case for that.
+
+        Accent override is not provided by the image render tool but it's useful.
+        */
         gfx = gfx.WithMouthOverride(MouthOverride);
+        gfx = gfx.WithMouthROverride(MouthOverride);
         gfx = gfx.WithEyesOverride(EyesOverride);
+        gfx = gfx.WithEyesROverride(EyesOverride);
+        gfx = gfx.WithAccentOverride(AccentOverride);
 
         return (gfx, Flip);
     }
