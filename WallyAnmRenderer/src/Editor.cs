@@ -38,7 +38,7 @@ public sealed class Editor
     public Animator? Animator { get; private set; }
     public GfxInfo GfxInfo { get; } = new();
     private RlColor _bgColor = new(0, 0, 51, 255); // #000033
-    private RlColor _highlightTint = new(255, 255, 0); // #FFFF00
+    private RlColor _highlightTint = new(0, 255, 0); // #00FF00
 
     public ViewportWindow ViewportWindow { get; } = new();
     public PathsWindow PathsWindow { get; } = new();
