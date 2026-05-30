@@ -243,17 +243,15 @@ public sealed class PickerWindow
             return costumeName;
         }
 
-        void selectCostume(string? costumeType)
-        {
-            gfxInfo.CostumeType = costumeType;
-            OnSelect(loader);
-        }
-
         PickerListBox<string?> picker = new()
         {
             Options = costumeTypes.Costumes.Prepend(null),
             OptionToString = costumeToName,
-            OnSelect = selectCostume,
+            OnSelect = costumeType =>
+            {
+                gfxInfo.CostumeType = costumeType;
+                loader.AssetLoader.ClearSwfShapeCache();
+            },
             ShouldShow = CreateShouldShowFromFilter<string?>(_costumeTypeFilter)
         };
         ImGui.InputText("Filter costumes", ref _costumeTypeFilter, 256);
@@ -288,7 +286,10 @@ public sealed class PickerWindow
         {
             Options = weaponSkinTypes.WeaponSkins.Prepend(null),
             OptionToString = weaponSkinToName,
-            OnSelect = (weaponSkinType) => gfxInfo.WeaponSkinType = weaponSkinType,
+            OnSelect = (weaponSkinType) => {
+                gfxInfo.WeaponSkinType = weaponSkinType;
+                loader.AssetLoader.ClearSwfShapeCache();
+            },
             ShouldShow = CreateShouldShowFromFilter<string?>(_weaponSkinTypeFilter),
         };
         ImGui.InputText("Filter weapon skins", ref _weaponSkinTypeFilter, 256);
@@ -950,10 +951,5 @@ public sealed class PickerWindow
         gfxInfo.VolleyBattleBallNumber = ballNumber;
 
         ImGui.PopID();
-    }
-
-    private static void OnSelect(Loader loader)
-    {
-        loader.AssetLoader.ClearSwfShapeCache();
     }
 }

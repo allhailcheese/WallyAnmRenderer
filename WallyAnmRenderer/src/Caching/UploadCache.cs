@@ -15,12 +15,12 @@ public abstract class UploadCache<K, I, V> where K : notnull
 
     protected abstract IEqualityComparer<K>? KeyEqualityComparer { get; }
 
-    protected ulong CacheVersion { get; private set; } = 0;
-    private readonly Dictionary<K, V> _cache;
-    private readonly HashSet<K> _errored;
-    private readonly ConcurrentQueue<V> _deleteQueue = [];
-    private readonly ConcurrentQueue<QueueElement> _queue = [];
-    private readonly HashSet<K> _queueSet;
+    protected ulong CacheVersion { get; private set; } = 0; //  used to cancel outdated loading work
+    private readonly Dictionary<K, V> _cache; // resouce cache
+    private readonly HashSet<K> _errored; // resources that errored when loading
+    private readonly ConcurrentQueue<V> _deleteQueue = []; // resources waiting to be unloaded in the main thread
+    private readonly ConcurrentQueue<QueueElement> _queue = []; // resources waiting to be loaded in the main thread
+    private readonly HashSet<K> _queueSet; // hashset of _queue
 
     public UploadCache()
     {
@@ -96,13 +96,12 @@ public abstract class UploadCache<K, I, V> where K : notnull
             if (!_queue.TryDequeue(out QueueElement queued))
                 break;
             (K k, I i, ulong version) = queued;
-
-            _errored.Remove(k);
             _queueSet.Remove(k);
 
             if (version == CacheVersion && !_cache.ContainsKey(k))
             {
                 V v = IntermediateToValue(i);
+                _errored.Remove(k);
                 _cache[k] = v;
                 UnloadIntermediate(i);
                 InitValue(v);

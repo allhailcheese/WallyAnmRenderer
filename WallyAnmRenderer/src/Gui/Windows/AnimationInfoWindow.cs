@@ -51,7 +51,7 @@ public sealed class AnimationInfoWindow
                     nodeId = (uint)sprite.GetHashCode();
                 }
 
-                ImGui.PushID((int)nodeId);
+                ImGui.PushID((nint)nodeId);
                 if (ImGui.TreeNode(spriteText))
                 {
                     if (ImGui.IsItemHovered())
@@ -63,6 +63,14 @@ public sealed class AnimationInfoWindow
                     {
                         ImGui.Text($"File: {boneSprite.SwfFilePath}");
                         ImGui.Text($"Frame: {boneSprite.Frame}");
+                        if (boneSprite is SwfBoneSpriteWithId boneSpriteWithId)
+                        {
+                            ImGui.Text($"SpriteId: {boneSpriteWithId.SpriteId}");
+                        }
+                        else if (boneSprite is SwfBoneSpriteWithName boneSpriteWithName)
+                        {
+                            ImGui.Text($"SpriteName: {boneSpriteWithName.SpriteName}");
+                        }
                     }
                     else if (sprite is BitmapBoneSprite bitmapSprite)
                     {
@@ -79,6 +87,33 @@ public sealed class AnimationInfoWindow
                     ImGui.Text($"ScaleY: {transform.ScaleY}");
                     ImGui.Text($"RotateSkew0: {transform.SkewY}");
                     ImGui.Text($"RotateSkew1: {transform.SkewX}");
+
+                    if (sprite is SwfBoneSprite swfBoneSprite && swfBoneSprite.ColorSwapDict.Count > 0)
+                    {
+                        ImGui.SeparatorText("Color Swaps");
+                        if (ImGui.TreeNode("Press to view list"))
+                        {
+                            int index = 0;
+                            foreach ((uint oldColor, uint newColor) in swfBoneSprite.ColorSwapDict)
+                            {
+                                ImGui.PushID(index++);
+
+                                ImGui.Text($"0x{oldColor:X06}");
+                                ImGui.SameLine();
+                                ImGui.ColorButton("##old", ImGuiEx.RGBHexToVec4(oldColor), ImGuiColorEditFlags.NoTooltip | ImGuiColorEditFlags.NoDragDrop);
+                                ImGui.SameLine();
+                                ImGui.Text(" --> ");
+                                ImGui.SameLine();
+                                ImGui.Text($"0x{newColor:X06}");
+                                ImGui.SameLine();
+                                ImGui.ColorButton("##new", ImGuiEx.RGBHexToVec4(newColor), ImGuiColorEditFlags.NoTooltip | ImGuiColorEditFlags.NoDragDrop);
+
+                                ImGui.PopID();
+                            }
+
+                            ImGui.TreePop();
+                        }
+                    }
 
                     ImGui.SeparatorText("Effects");
                     ImGui.Text($"Opacity: {sprite.Opacity}");
