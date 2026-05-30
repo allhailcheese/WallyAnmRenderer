@@ -79,7 +79,7 @@ run the project (inside the WallyAnmRenderer folder created by git clone):
 
 This list includes the dependencies from submodules.
 
-- Magick.NET (14.12.0) - Library for image manipulation. Used for svg rasterization.
+- Magick.NET (14.13.1) - Library for image manipulation. Used for svg rasterization.
 
 - NativeFileDialogSharp (0.5.0) - C# bindings for nativefiledialog, a C library for opening the platform's default file explorer dialog.
 
