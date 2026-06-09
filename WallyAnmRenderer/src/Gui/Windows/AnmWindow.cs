@@ -43,13 +43,13 @@ public sealed class AnmWindow
 
         if (ImGui.BeginTabBar("options", ImGuiTabBarFlags.NoCloseWithMiddleMouseButton))
         {
-            if (ImGui.BeginTabItem(".ANM"))
+            if (ImGui.BeginTabItem("AMN Animations"))
             {
                 AnmTab(brawlPath, assetLoader, info);
                 ImGui.EndTabItem();
             }
 
-            if (ImGui.BeginTabItem(".SWF"))
+            if (ImGui.BeginTabItem("SWF Sprites"))
             {
                 SwfTab(brawlPath, assetLoader, info);
                 ImGui.EndTabItem();
@@ -177,6 +177,10 @@ public sealed class AnmWindow
 
     private void SwfTab(string brawlPath, AssetLoader assetLoader, GfxInfo info)
     {
+        ImGui.PushTextWrapPos();
+        ImGui.TextColored(Colors.NOTE_TEXT, "In this tab you can view individual sprites. To view a full animation, go to the ANM Animations tab");
+        ImGui.PopTextWrapPos();
+
         string[] baseFiles = Directory.Exists(brawlPath) ? Directory.GetFiles(brawlPath, "*.swf") : [];
         string bonesSwfPath = Path.Join(brawlPath, "bones");
         string[] bonesFiles = Directory.Exists(bonesSwfPath) ? Directory.GetFiles(bonesSwfPath, "*.swf") : [];
