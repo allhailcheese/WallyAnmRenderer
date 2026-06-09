@@ -43,7 +43,7 @@ public sealed class AnmWindow
 
         if (ImGui.BeginTabBar("options", ImGuiTabBarFlags.NoCloseWithMiddleMouseButton))
         {
-            if (ImGui.BeginTabItem("AMN Animations"))
+            if (ImGui.BeginTabItem("ANM Animations"))
             {
                 AnmTab(brawlPath, assetLoader, info);
                 ImGui.EndTabItem();
