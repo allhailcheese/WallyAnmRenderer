@@ -82,7 +82,7 @@ public sealed class AssetLoader(string brawlPath)
     public Texture2DWrapper? LoadTexture(ISpriteData spriteData)
     {
         string file = Path.GetFullPath(Path.Combine(_brawlPath, spriteData.File));
-        return _textureCache.GetCachedOrLoad(file).ToNullable();
+        return _textureCache.GetCachedOrLoad(file, spriteData.XOffset, spriteData.YOffset).ToNullable();
     }
 
     public Texture2DWrapper? LoadShapeFromSwf(string filePath, string spriteName, ushort shapeId, double animScale, Dictionary<uint, uint> colorSwapDict, ColorTransform colorTransform)

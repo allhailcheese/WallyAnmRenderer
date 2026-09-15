@@ -84,5 +84,5 @@ public class TextureCache : UploadCache<TextureCache.SpriteData, (RlImage, Trans
     {
         return base.TryGetCached(new(filePath, 0, 0), out texture);
     }
-    public Maybe<Texture2DWrapper> GetCachedOrLoad(string filePath) => base.GetCachedOrLoad(new(filePath, 0, 0));
+    public Maybe<Texture2DWrapper> GetCachedOrLoad(string filePath, double offsetX, double offsetY) => GetCachedOrLoad(new(filePath, offsetX, offsetY));
 }

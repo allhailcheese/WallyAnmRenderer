@@ -99,19 +99,16 @@ public static class Maybe
 
     public static Maybe<T> FromNullable<T>(T? value)
     {
-        if (value is null) return Maybe<T>.None;
-        return value;
+        return value is null ? Maybe<T>.None : value;
     }
 
     public static T? ToNullable<T>(this Maybe<T> maybe) where T : class
     {
-        return ((Maybe<T?>)maybe!).ValueOr((T?)null);
+        return maybe.TryGetValue(out T? t) ? t : null;
     }
 
     public static Maybe<T> Flatten<T>(this Maybe<Maybe<T>> maybe)
     {
-        if (maybe.TryGetValue(out Maybe<T> inside))
-            return inside;
-        return Maybe<T>.None;
+        return maybe.TryGetValue(out Maybe<T> inside) ? inside : Maybe<T>.None;
     }
 }
