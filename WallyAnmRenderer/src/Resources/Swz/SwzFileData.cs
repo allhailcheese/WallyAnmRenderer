@@ -145,13 +145,10 @@ public sealed class SwzGameFile
         {
             StringReader textReader = new(text);
             textReader.ReadLine(); // skip first line bullshit
-            SepReaderOptions reader = Sep.New(',').Reader((opts) =>
+            SepReaderOptions reader = Sep.New(',').Reader((opts) => opts with
             {
-                return opts with
-                {
-                    DisableColCountCheck = true,
-                    Unescape = true,
-                };
+                DisableColCountCheck = true,
+                Unescape = true,
             });
             return reader.From(textReader);
         }
@@ -223,12 +220,16 @@ public sealed class SwzGameFile
             ColorExceptionTypes = new(reader);
 
         SpriteData = new();
-        string spriteDataContent = data[SPRITE_DATA];
-        using (SepReader reader = readerFromText(spriteDataContent))
+        if (data.TryGetFile(SPRITE_DATA, out string? spriteDataContent))
+        {
+            using SepReader reader = readerFromText(spriteDataContent);
             SpriteData.ApplySpriteData(reader);
-        string manualBoneSpriteDataContent = data[MANUAL_BONE_SPRITE_DATA];
-        using (SepReader reader = readerFromText(manualBoneSpriteDataContent))
+        }
+        if (data.TryGetFile(MANUAL_BONE_SPRITE_DATA, out string? manualBoneSpriteDataContent))
+        {
+            using SepReader reader = readerFromText(manualBoneSpriteDataContent);
             SpriteData.ApplySpriteData(reader);
+        }
     }
 
     public static SwzGameFile New(string filePath, uint key)
