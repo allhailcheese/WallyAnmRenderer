@@ -230,9 +230,9 @@ public sealed class GfxInfo : IGfxInfo
             }
         }
 
-        if (EmojiType is not null)
+        EmojiTypes? emojiTypes = gameFiles.EmojiTypes;
+        if (EmojiType is not null && emojiTypes is not null)
         {
-            EmojiTypes emojiTypes = gameFiles.EmojiTypes;
             if (emojiTypes.TryGetGfx(EmojiType, out EmojiTypesGfx? emoji))
             {
                 IGfxType emojiGfx = emoji.ToGfxType();
@@ -242,9 +242,9 @@ public sealed class GfxInfo : IGfxInfo
             }
         }
 
-        if (EndMatchVoicelineType is not null)
+        EndMatchVoicelineTypes? endMatchVoicelineTypes = gameFiles.EndMatchVoicelineTypes;
+        if (EndMatchVoicelineType is not null && endMatchVoicelineTypes is not null)
         {
-            EndMatchVoicelineTypes endMatchVoicelineTypes = gameFiles.EndMatchVoicelineTypes;
             if (endMatchVoicelineTypes.TryGetGfx(EndMatchVoicelineType, out EndMatchVoicelineTypesGfx? voiceline))
             {
                 IGfxType voicelineGfx = voiceline.ToGfxType();
@@ -256,8 +256,8 @@ public sealed class GfxInfo : IGfxInfo
 
         if (ClientThemeType is not null)
         {
-            ClientThemeTypes endMatchVoicelineTypes = gameFiles.ClientThemeTypes;
-            if (endMatchVoicelineTypes.TryGetGfx(ClientThemeType, out ClientThemeTypesGfx? theme))
+            ClientThemeTypes clientThemeTypes = gameFiles.ClientThemeTypes;
+            if (clientThemeTypes.TryGetGfx(ClientThemeType, out ClientThemeTypesGfx? theme))
             {
                 IGfxType themeGfx = theme.ToGfxType();
                 // we do a bit of cheating. client theme is meant to be a standalone gfx, so we merge it manually.

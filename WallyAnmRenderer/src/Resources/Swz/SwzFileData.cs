@@ -131,8 +131,8 @@ public sealed class SwzGameFile
     public SeasonBorderTypes SeasonBorderTypes { get; }
     public PlayerThemeTypes PlayerThemeTypes { get; }
     public AvatarTypes AvatarTypes { get; }
-    public EmojiTypes EmojiTypes { get; }
-    public EndMatchVoicelineTypes EndMatchVoicelineTypes { get; }
+    public EmojiTypes? EmojiTypes { get; } = null;
+    public EndMatchVoicelineTypes? EndMatchVoicelineTypes { get; } = null;
     public ClientThemeTypes ClientThemeTypes { get; }
     public ColorSchemeTypes ColorSchemeTypes { get; }
     public ColorExceptionTypes ColorExceptionTypes { get; }
@@ -198,13 +198,17 @@ public sealed class SwzGameFile
         using (SepReader reader = readerFromText(avatarTypesContent))
             AvatarTypes = new(reader);
 
-        string emojiTypesContent = data[EMOJI_TYPES];
-        XElement emojiTypesElement = XElement.Parse(emojiTypesContent);
-        EmojiTypes = new(emojiTypesElement);
+        if (data.TryGetFile(EMOJI_TYPES, out string? emojiTypesContent))
+        {
+            XElement emojiTypesElement = XElement.Parse(emojiTypesContent);
+            EmojiTypes = new(emojiTypesElement);
+        }
 
-        string endMatchVoicelineTypesContent = data[END_MATCH_VOICELINE_TYPES];
-        XElement endMatchVoicelineTypesElement = XElement.Parse(endMatchVoicelineTypesContent);
-        EndMatchVoicelineTypes = new(endMatchVoicelineTypesElement);
+        if (data.TryGetFile(END_MATCH_VOICELINE_TYPES, out string? endMatchVoicelineTypesContent))
+        {
+            XElement endMatchVoicelineTypesElement = XElement.Parse(endMatchVoicelineTypesContent);
+            EndMatchVoicelineTypes = new(endMatchVoicelineTypesElement);
+        }
 
         string clientThemeTypesContent = data[CLIENT_THEME_TYPES];
         XElement clientThemeTypesElement = XElement.Parse(clientThemeTypesContent);

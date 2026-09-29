@@ -701,7 +701,13 @@ public sealed class PickerWindow
             return;
         }
 
-        EmojiTypes emojiTypes = loader.SwzFiles.Game.EmojiTypes;
+        EmojiTypes? emojiTypes = loader.SwzFiles.Game.EmojiTypes;
+
+        if (emojiTypes is null)
+        {
+            ImGui.TextWrapped("No EmojiTypes.xml found in swz file. You may be using an older version of the game.");
+            return;
+        }
 
         ImGui.PushTextWrapPos();
         if (gfxInfo.EmojiType is not null && emojiTypes.TryGetGfx(gfxInfo.EmojiType, out EmojiTypesGfx? gfx))
@@ -747,7 +753,13 @@ public sealed class PickerWindow
             return;
         }
 
-        EndMatchVoicelineTypes endMatchVoicelineTypes = loader.SwzFiles.Game.EndMatchVoicelineTypes;
+        EndMatchVoicelineTypes? endMatchVoicelineTypes = loader.SwzFiles.Game.EndMatchVoicelineTypes;
+
+        if (endMatchVoicelineTypes is null)
+        {
+            ImGui.TextWrapped("No EndMatchVoicelineTypes.xml found in swz file. You may be using an older version of the game.");
+            return;
+        }
 
         ImGui.PushTextWrapPos();
         if (gfxInfo.EndMatchVoicelineType is not null && endMatchVoicelineTypes.TryGetGfx(gfxInfo.EndMatchVoicelineType, out EndMatchVoicelineTypesGfx? gfx))
