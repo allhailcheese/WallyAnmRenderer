@@ -237,7 +237,7 @@ public sealed class AnmWindow
                 if (ImGui.Button("Retry"))
                 {
                     assetLoader.RemoveCachedSwf(absolutePath);
-                    assetLoader.LoadSwf(absolutePath).Preserve();
+                    assetLoader.LoadSwf(absolutePath).AsTask();
                 }
                 ImGui.SameLine();
                 ImGui.TextColored(Colors.ERROR_TEXT, "Error!");
@@ -316,7 +316,7 @@ public sealed class AnmWindow
                 ImGui.SameLine();
                 if (ImGui.Button("Load"))
                 {
-                    assetLoader.LoadSwf(relativePath).Preserve();
+                    assetLoader.LoadSwf(relativePath).AsTask();
                 }
             }
             ImGui.PopID();
