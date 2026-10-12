@@ -14,10 +14,13 @@ public abstract class ManagedCache<K, V> where K : notnull
 
     public bool TryGetCached(K k, [MaybeNullWhen(false)] out V v)
     {
-        if (_cache.TryGetValue(k, out LazyTask<V>? task) && task.Value.IsCompletedSuccessfully)
+        if (_cache.TryGetValue(k, out LazyTask<V>? task))
         {
-            v = task.Value.Result;
-            return true;
+            if (task.Value.IsCompletedSuccessfully)
+            {
+                v = task.Value.Result;
+                return true;
+            }
         }
         v = default;
         return false;
@@ -41,6 +44,15 @@ public abstract class ManagedCache<K, V> where K : notnull
         if (_cache.TryGetValue(k, out LazyTask<V>? item))
         {
             return !item.Value.IsCompleted;
+        }
+        return false;
+    }
+
+    public bool IsErrored(K k)
+    {
+        if (_cache.TryGetValue(k, out LazyTask<V>? item))
+        {
+            return item.Value.IsFaulted;
         }
         return false;
     }
@@ -93,6 +105,7 @@ public abstract class ManagedCache<K, V> where K : notnull
         public bool IsCompleted => task.IsCompleted;
         public bool IsCanceled => task.IsCanceled;
         public bool IsCompletedSuccessfully => task.IsCompletedSuccessfully;
+        public bool IsFaulted => task.IsFaulted;
         public T Result => task.Result;
         public TaskAwaiter<T> GetAwaiter() => task.GetAwaiter();
 

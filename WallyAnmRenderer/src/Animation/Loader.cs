@@ -17,6 +17,7 @@ namespace WallyAnmRenderer;
 
 public sealed class Loader : ILoader
 {
+    // hack to be able to store a sprite id in the anim class
     public const string SPRITE_ID_PREFIX = "\uffff";
 
     private CancellationTokenSource? _loadSwzToken = null;
@@ -93,7 +94,7 @@ public sealed class Loader : ILoader
     {
         AnmClassAdapter? impl()
         {
-            if (AssetLoader.AnmFileCache.TryGetAnmClass(classIdentifier, out AnmClass? @class))
+            if (AssetLoader.TryGetAnmClass(classIdentifier, out AnmClass? @class))
                 return new(@class);
             return null;
         }
@@ -117,7 +118,7 @@ public sealed class Loader : ILoader
         return ValueTask.FromResult(impl());
     }
 
-    public ValueTask<string?> GetBoneName(short boneId)
+    public ValueTask<string?> GetBoneName(uint boneId)
     {
         string? impl()
         {
@@ -125,10 +126,10 @@ public sealed class Loader : ILoader
                 return null;
 
             BoneTypes boneTypes = SwzFiles.Init.BoneTypes;
-            if (boneId <= 0 || boneId > boneTypes.BoneCount)
+            if (boneId == 0 || boneId > boneTypes.BoneCount)
                 return null;
 
-            return boneTypes[boneId - 1];
+            return boneTypes[(int)(boneId - 1)];
         }
 
         return ValueTask.FromResult(impl());
@@ -158,7 +159,6 @@ public sealed class Loader : ILoader
 
     public async ValueTask<ushort?> GetSymbolId(string swfPath, string symbolName)
     {
-        // hack to be able to store a sprite id in the anim class
         if (symbolName.StartsWith(SPRITE_ID_PREFIX))
             return ushort.TryParse(symbolName[SPRITE_ID_PREFIX.Length..], out ushort result) ? result : null;
 

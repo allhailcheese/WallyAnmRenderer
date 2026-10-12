@@ -26,49 +26,78 @@ public sealed class AssetLoader(string brawlPath)
         }
     }
 
-    public AnmFormatEnum AnmFormat
+    public AnmVersionEnum AnmVersion
     {
-        get => AnmFileCache.AnmFormat;
-        set => AnmFileCache.AnmFormat = value;
+        get => _anmFileCache.AnmVersion;
+        set => _anmFileCache.AnmVersion = value;
     }
 
-    public AnmFileCache AnmFileCache { get; } = new();
+    private readonly AnmFileCache _anmFileCache = new();
     private readonly TextureCache _textureCache = new();
-    public SwfFileCache SwfFileCache { get; } = new();
+    private readonly SwfFileCache _swfFileCache = new();
     private readonly SwfShapeCache _swfShapeCache = new();
     private readonly SwfOverrideMap _swfFileOverrides = new(brawlPath);
 
     public bool IsAnmLoading(string filePath)
     {
         string finalPath = Path.GetFullPath(Path.Combine(_brawlPath, filePath));
-        return AnmFileCache.IsLoading(finalPath);
+        return _anmFileCache.IsLoading(finalPath);
+    }
+
+    public bool IsAnmErrored(string filePath)
+    {
+        string finalPath = Path.GetFullPath(Path.Combine(_brawlPath, filePath));
+        return _anmFileCache.IsErrored(finalPath);
     }
 
     public bool TryGetAnm(string filePath, [MaybeNullWhen(false)] out AnmFile anm)
     {
         string finalPath = Path.GetFullPath(Path.Combine(_brawlPath, filePath));
-        return AnmFileCache.TryGetCached(finalPath, out anm);
+        return _anmFileCache.TryGetCached(finalPath, out anm);
+    }
+
+    public void RemoveCachedAnm(string filePath)
+    {
+        string finalPath = Path.GetFullPath(Path.Combine(_brawlPath, filePath));
+        _anmFileCache.RemoveCached(finalPath);
     }
 
     public AnmFile? LoadAnm(string filePath)
     {
         string finalPath = Path.GetFullPath(Path.Combine(_brawlPath, filePath));
-        ValueTask<AnmFile> task = AnmFileCache.LoadAsync(finalPath);
+        ValueTask<AnmFile> task = _anmFileCache.LoadAsync(finalPath);
         if (task.IsCompletedSuccessfully)
             return task.Result;
         return null;
     }
 
+    public bool TryGetAnmClass(string name, [MaybeNullWhen(false)] out AnmClass @class)
+    {
+        return _anmFileCache.TryGetAnmClass(name, out @class);
+    }
+
     public bool IsSwfLoading(string filePath)
     {
         string finalPath = Path.GetFullPath(Path.Combine(_brawlPath, filePath));
-        return SwfFileCache.IsLoading(finalPath);
+        return _swfFileCache.IsLoading(finalPath);
+    }
+
+    public bool IsSwfErrored(string filePath)
+    {
+        string finalPath = Path.GetFullPath(Path.Combine(_brawlPath, filePath));
+        return _swfFileCache.IsErrored(finalPath);
     }
 
     public bool TryGetSwf(string filePath, [MaybeNullWhen(false)] out SwfFileData swf)
     {
         string finalPath = Path.GetFullPath(Path.Combine(_brawlPath, filePath));
-        return SwfFileCache.TryGetCached(finalPath, out swf);
+        return _swfFileCache.TryGetCached(finalPath, out swf);
+    }
+
+    public void RemoveCachedSwf(string filePath)
+    {
+        string finalPath = Path.GetFullPath(Path.Combine(_brawlPath, filePath));
+        _swfFileCache.RemoveCached(finalPath);
     }
 
     public ValueTask<SwfFileData> LoadSwf(string filePath)
@@ -76,7 +105,7 @@ public sealed class AssetLoader(string brawlPath)
         string finalPath = Path.GetFullPath(Path.Combine(_brawlPath, filePath));
         if (_swfFileOverrides.TryGetValue(finalPath, out SwfOverride overrideData))
             return ValueTask.FromResult(overrideData.Data);
-        return SwfFileCache.LoadAsync(finalPath);
+        return _swfFileCache.LoadAsync(finalPath);
     }
 
     public Texture2DWrapper? LoadTexture(ISpriteData spriteData)
@@ -137,11 +166,11 @@ public sealed class AssetLoader(string brawlPath)
 
     public void ClearSwfFileCache()
     {
-        SwfFileCache.Clear();
+        _swfFileCache.Clear();
     }
 
     public void ClearAnmCache()
     {
-        AnmFileCache.Clear();
+        _anmFileCache.Clear();
     }
 }

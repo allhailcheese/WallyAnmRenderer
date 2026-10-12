@@ -11,7 +11,17 @@ namespace WallyAnmRenderer;
 
 public sealed class AnmWindow
 {
-    private static readonly string[] ANM_FORMAT_OPTIONS = ["Current", "?.??-9.04"];
+    private static readonly AnmVersionEnum[] ANM_FORMAT_OPTIONS = [
+        AnmVersionEnum.From904ToCurrent,
+        AnmVersionEnum.From710To904,
+        AnmVersionEnum.To704,
+    ];
+
+    private static readonly string[] ANM_FORMAT_LABELS = [
+        "9.05-Current",
+        "7.10-9.04",
+        "???-7.04",
+    ];
 
     private bool _open = true;
     public bool Open { get => _open; set => _open = value; }
@@ -63,9 +73,11 @@ public sealed class AnmWindow
 
     private void AnmTab(string brawlPath, AssetLoader assetLoader, GfxInfo info)
     {
-        assetLoader.AnmFormat = ImGuiEx.EnumCombo("Anm format", assetLoader.AnmFormat, ANM_FORMAT_OPTIONS);
+        int index = Array.FindIndex(ANM_FORMAT_OPTIONS, v => v == assetLoader.AnmVersion);
+        if (ImGui.Combo("Anm format", ref index, ANM_FORMAT_LABELS, ANM_FORMAT_LABELS.Length))
+            assetLoader.AnmVersion = ANM_FORMAT_OPTIONS[index];
 
-        if (assetLoader.AnmFormat != AnmFormatEnum.Current)
+        if (assetLoader.AnmVersion != AnmVersionEnum.From904ToCurrent)
         {
             ImGui.PushTextWrapPos();
             ImGui.TextColored(Colors.WARN_TEXT, "You've selected an older anm format. Unless you are working with older patches, loading anm files will fail.");
@@ -90,10 +102,22 @@ public sealed class AnmWindow
                 ImGui.SameLine();
                 if (ImGui.Button("Cancel"))
                 {
-                    assetLoader.AnmFileCache.RemoveCached(absolutePath);
+                    assetLoader.RemoveCachedAnm(absolutePath);
                 }
                 ImGui.SameLine();
                 ImGui.TextDisabled("Loading...");
+            }
+            else if (assetLoader.IsAnmErrored(relativePath))
+            {
+                ImGui.Text(fileName);
+                ImGui.SameLine();
+                if (ImGui.Button("Retry"))
+                {
+                    assetLoader.RemoveCachedAnm(absolutePath);
+                    assetLoader.LoadAnm(relativePath);
+                }
+                ImGui.SameLine();
+                ImGui.TextColored(Colors.ERROR_TEXT, "Error!");
             }
             else if (assetLoader.TryGetAnm(relativePath, out AnmFile? anm))
             {
@@ -103,7 +127,7 @@ public sealed class AnmWindow
                     if (ImGui.Button("Unload"))
                     {
                         FileUnloaded?.Invoke(this, relativePath);
-                        assetLoader.AnmFileCache.RemoveCached(absolutePath);
+                        assetLoader.RemoveCachedAnm(absolutePath);
                     }
                 }
 
@@ -201,10 +225,22 @@ public sealed class AnmWindow
                 ImGui.SameLine();
                 if (ImGui.Button("Cancel"))
                 {
-                    assetLoader.SwfFileCache.RemoveCached(absolutePath);
+                    assetLoader.RemoveCachedSwf(absolutePath);
                 }
                 ImGui.SameLine();
                 ImGui.TextDisabled("Loading...");
+            }
+            else if (assetLoader.IsSwfErrored(relativePath))
+            {
+                ImGui.Text(displayName);
+                ImGui.SameLine();
+                if (ImGui.Button("Retry"))
+                {
+                    assetLoader.RemoveCachedSwf(absolutePath);
+                    assetLoader.LoadSwf(absolutePath).Preserve();
+                }
+                ImGui.SameLine();
+                ImGui.TextColored(Colors.ERROR_TEXT, "Error!");
             }
             else if (assetLoader.TryGetSwf(relativePath, out SwfFileData? swf))
             {
@@ -214,7 +250,7 @@ public sealed class AnmWindow
                     if (ImGui.Button("Unload"))
                     {
                         FileUnloaded?.Invoke(this, relativePath);
-                        assetLoader.SwfFileCache.RemoveCached(absolutePath);
+                        assetLoader.RemoveCachedSwf(absolutePath);
                     }
                 }
 
@@ -280,11 +316,7 @@ public sealed class AnmWindow
                 ImGui.SameLine();
                 if (ImGui.Button("Load"))
                 {
-                    async Task load()
-                    {
-                        await assetLoader.LoadSwf(relativePath);
-                    }
-                    _ = load();
+                    assetLoader.LoadSwf(relativePath).Preserve();
                 }
             }
             ImGui.PopID();

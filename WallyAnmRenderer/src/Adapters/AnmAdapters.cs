@@ -3,8 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using BrawlhallaAnimLib.Anm;
 using WallyAnmSpinzor;
-using WallyAnmSpinzor.Version_904;
-
 namespace WallyAnmRenderer;
 
 public readonly struct AnmClassAdapter(AnmClass anmClass) : IAnmClass
@@ -39,63 +37,13 @@ public readonly struct AnmFrameAdapter(AnmFrame frame) : IAnmFrame
 
 public readonly struct AnmBoneAdapter(AnmBone bone) : IAnmBone
 {
-    public short Id => bone.Id;
-    public float ScaleX => bone.ScaleX;
-    public float RotateSkew0 => bone.RotateSkew0;
-    public float RotateSkew1 => bone.RotateSkew1;
-    public float ScaleY => bone.ScaleY;
-    public float X => bone.X;
-    public float Y => bone.Y;
+    public uint Id => bone.Id;
+    public double ScaleX => bone.ScaleX;
+    public double RotateSkew0 => bone.RotateSkew0;
+    public double RotateSkew1 => bone.RotateSkew1;
+    public double ScaleY => bone.ScaleY;
+    public double X => bone.X;
+    public double Y => bone.Y;
     public double Opacity => bone.Opacity;
     public short Frame => bone.Frame;
-}
-
-public static class Anm904Migrator
-{
-    public static AnmFile MigrateFile(AnmFile_904 file) => new()
-    {
-        Header = file.Header,
-        Classes = file.Classes.ToDictionary((entry) => entry.Key, (entry) => MigrateClass(entry.Value)),
-    };
-
-    public static AnmClass MigrateClass(AnmClass_904 @class) => new()
-    {
-        Index = @class.Index,
-        FileName = @class.FileName,
-        Animations = @class.Animations.ToDictionary((entry) => entry.Key, (entry) => MigrateAnimation(entry.Value)),
-    };
-
-    public static AnmAnimation MigrateAnimation(AnmAnimation_904 animation) => new()
-    {
-        Name = animation.Name,
-        LoopStart = animation.LoopStart,
-        RecoveryStart = animation.RecoveryStart,
-        FreeStart = animation.FreeStart,
-        PreviewFrame = animation.PreviewFrame,
-        BaseStart = animation.BaseStart,
-        RunEndFrames = [.. animation.RunEndFrames],
-        Frames = [.. animation.Frames.Select(MigrateFrame)],
-    };
-
-    public static AnmFrame MigrateFrame(AnmFrame_904 frame) => new()
-    {
-        Id = frame.Id,
-        FireSocket = frame.FireSocket,
-        EBPlatformPos = frame.EBPlatformPos,
-        // EBPlatformRot was removed
-        Bones = [.. frame.Bones.Select(MigrateBone)],
-    };
-
-    public static AnmBone MigrateBone(AnmBone_904 bone) => new()
-    {
-        Id = bone.Id,
-        ScaleX = bone.ScaleX,
-        RotateSkew0 = bone.RotateSkew0,
-        RotateSkew1 = bone.RotateSkew1,
-        ScaleY = bone.ScaleY,
-        X = bone.X,
-        Y = bone.Y,
-        Opacity = bone.Opacity,
-        Frame = (sbyte)bone.Frame
-    };
 }
