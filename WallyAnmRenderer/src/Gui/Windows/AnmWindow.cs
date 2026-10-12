@@ -102,7 +102,7 @@ public sealed class AnmWindow
                 ImGui.SameLine();
                 if (ImGui.Button("Cancel"))
                 {
-                    assetLoader.RemoveCachedAnm(absolutePath);
+                    assetLoader.RemoveCachedAnm(relativePath);
                 }
                 ImGui.SameLine();
                 ImGui.TextDisabled("Loading...");
@@ -113,7 +113,7 @@ public sealed class AnmWindow
                 ImGui.SameLine();
                 if (ImGui.Button("Retry"))
                 {
-                    assetLoader.RemoveCachedAnm(absolutePath);
+                    assetLoader.RemoveCachedAnm(relativePath);
                     assetLoader.LoadAnm(relativePath);
                 }
                 ImGui.SameLine();
@@ -127,7 +127,7 @@ public sealed class AnmWindow
                     if (ImGui.Button("Unload"))
                     {
                         FileUnloaded?.Invoke(this, relativePath);
-                        assetLoader.RemoveCachedAnm(absolutePath);
+                        assetLoader.RemoveCachedAnm(relativePath);
                     }
                 }
 
@@ -225,7 +225,7 @@ public sealed class AnmWindow
                 ImGui.SameLine();
                 if (ImGui.Button("Cancel"))
                 {
-                    assetLoader.RemoveCachedSwf(absolutePath);
+                    assetLoader.RemoveCachedSwf(relativePath);
                 }
                 ImGui.SameLine();
                 ImGui.TextDisabled("Loading...");
@@ -236,8 +236,8 @@ public sealed class AnmWindow
                 ImGui.SameLine();
                 if (ImGui.Button("Retry"))
                 {
-                    assetLoader.RemoveCachedSwf(absolutePath);
-                    assetLoader.LoadSwf(absolutePath).AsTask();
+                    assetLoader.RemoveCachedSwf(relativePath);
+                    assetLoader.LoadSwf(relativePath).AsTask();
                 }
                 ImGui.SameLine();
                 ImGui.TextColored(Colors.ERROR_TEXT, "Error!");
@@ -250,7 +250,7 @@ public sealed class AnmWindow
                     if (ImGui.Button("Unload"))
                     {
                         FileUnloaded?.Invoke(this, relativePath);
-                        assetLoader.RemoveCachedSwf(absolutePath);
+                        assetLoader.RemoveCachedSwf(relativePath);
                     }
                 }
 
