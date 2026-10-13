@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using ImGuiNET;
 using SwfLib.Tags;
 using WallyAnmSpinzor;
@@ -14,13 +13,15 @@ public sealed class AnmWindow
     private static readonly AnmVersionEnum[] ANM_FORMAT_OPTIONS = [
         AnmVersionEnum.From904ToCurrent,
         AnmVersionEnum.From710To904,
-        AnmVersionEnum.To704,
+        AnmVersionEnum.From703To704,
+        AnmVersionEnum.To702,
     ];
 
     private static readonly string[] ANM_FORMAT_LABELS = [
         "9.05-Current",
         "7.10-9.04",
-        "???-7.04",
+        "7.03-7.04",
+        "???-7.02",
     ];
 
     private bool _open = true;

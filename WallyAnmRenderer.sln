@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrawlhallaAnimLib", "Brawlh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwiffCheese", "SwiffCheese\SwiffCheese.csproj", "{D0798957-78F5-4E4F-B0EA-823C19AB7AAE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WallyAnmSpinzor", "WallyAnmSpinzor\WallyAnmSpinzor.csproj", "{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{D0798957-78F5-4E4F-B0EA-823C19AB7AAE}.Release|x64.Build.0 = Release|Any CPU
 		{D0798957-78F5-4E4F-B0EA-823C19AB7AAE}.Release|x86.ActiveCfg = Release|Any CPU
 		{D0798957-78F5-4E4F-B0EA-823C19AB7AAE}.Release|x86.Build.0 = Release|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Debug|x64.Build.0 = Debug|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Debug|x86.Build.0 = Debug|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Release|x64.ActiveCfg = Release|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Release|x64.Build.0 = Release|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Release|x86.ActiveCfg = Release|Any CPU
+		{987D8404-A36A-4D3B-ADFA-CE5F1669FF1C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
