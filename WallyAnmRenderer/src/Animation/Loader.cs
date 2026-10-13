@@ -6,12 +6,12 @@ using System.IO;
 using SwfLib.Tags;
 using SwfLib.Tags.ShapeTags;
 using SwfLib.Tags.TextTags;
+using SwfLib.Tags.ShapeMorphingTags;
 using BrawlhallaAnimLib;
 using BrawlhallaAnimLib.Anm;
+using BrawlhallaAnimLib.Gfx;
 using BrawlhallaLangReader;
 using WallyAnmSpinzor;
-using BrawlhallaAnimLib.Gfx;
-using SwfLib.Tags.ShapeMorphingTags;
 
 namespace WallyAnmRenderer;
 
