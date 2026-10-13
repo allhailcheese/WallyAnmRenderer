@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using BrawlhallaLangReader;
 using BrawlhallaSwz;
 using nietras.SeparatedValues;
 
@@ -52,14 +54,50 @@ public sealed class SwzFileData
     }
 }
 
+public sealed class SwzEngineFile
+{
+    private const string STRING_TABLE = "stringTable.csv";
+    private static readonly HashSet<string> TO_READ = [STRING_TABLE];
+
+    public LangFile? StringTable { get; }
+
+    private SwzEngineFile(SwzFileData data)
+    {
+        if (data.TryGetFile(STRING_TABLE, out string? stringTableContents))
+        {
+            using SepReader reader = CsvReadUtils.ReaderFromText(stringTableContents);
+            StringTable = new() { Header = 0, Entries = [] };
+            foreach (SepReader.Row row in reader)
+            {
+                string key = row["StringKey"].ToString();
+                string text = row["English"].ToString();
+                if (key == "Template") continue;
+                StringTable.Entries[key] = text;
+            }
+        }
+    }
+
+    public static SwzEngineFile New(string filePath, uint key)
+    {
+        return new(SwzFileData.New(filePath, key, TO_READ));
+    }
+
+    public static async Task<SwzEngineFile> NewAsync(string filePath, uint key, CancellationToken cancellationToken = default)
+    {
+        return new(await SwzFileData.NewAsync(filePath, key, TO_READ, cancellationToken));
+    }
+}
+
 public sealed class SwzInitFile
 {
     private const string BONE_TYPES = "BoneTypes.xml";
     private const string BONE_SOURCES = "BoneSources.xml";
-    private static readonly HashSet<string> TO_READ = [BONE_TYPES, BONE_SOURCES];
+    private const string LORE_STRING_TABLE = "loreStringTable.csv";
+    private static readonly HashSet<string> TO_READ = [BONE_TYPES, BONE_SOURCES, LORE_STRING_TABLE];
 
     public BoneTypes BoneTypes { get; }
     public BoneSources BoneSources { get; }
+    public LangFile? LoreStringTable { get; }
 
     private SwzInitFile(SwzFileData data)
     {
@@ -70,6 +108,19 @@ public sealed class SwzInitFile
         string boneSourcesContent = data[BONE_SOURCES];
         XElement boneSourcesElement = XElement.Parse(boneSourcesContent);
         BoneSources = new(boneSourcesElement);
+
+        if (data.TryGetFile(LORE_STRING_TABLE, out string? loreStringTableContents))
+        {
+            using SepReader reader = CsvReadUtils.ReaderFromText(loreStringTableContents);
+            LoreStringTable = new() { Header = 0, Entries = [] };
+            foreach (SepReader.Row row in reader)
+            {
+                string key = row["StringKey"].ToString();
+                string text = row["English"].ToString();
+                if (key == "Template") continue;
+                LoreStringTable.Entries[key] = text;
+            }
+        }
     }
 
     public static SwzInitFile New(string filePath, uint key)
@@ -141,32 +192,20 @@ public sealed class SwzGameFile
 
     private SwzGameFile(SwzFileData data)
     {
-        static SepReader readerFromText(string text)
-        {
-            StringReader textReader = new(text);
-            textReader.ReadLine(); // skip first line bullshit
-            SepReaderOptions reader = Sep.New(',').Reader((opts) => opts with
-            {
-                DisableColCountCheck = true,
-                Unescape = true,
-            });
-            return reader.From(textReader);
-        }
-
         string heroTypesContent = data[HERO_TYPES];
         XElement heroTypesElement = XElement.Parse(heroTypesContent);
         HeroTypes = new(heroTypesElement);
 
         string costumeTypesContent = data[COSTUME_TYPES];
-        using (SepReader reader = readerFromText(costumeTypesContent))
+        using (SepReader reader = CsvReadUtils.ReaderFromText(costumeTypesContent))
             CostumeTypes = new(reader, HeroTypes);
 
         string weaponSkinTypesContent = data[WEAPON_SKIN_TYPES];
-        using (SepReader reader = readerFromText(weaponSkinTypesContent))
+        using (SepReader reader = CsvReadUtils.ReaderFromText(weaponSkinTypesContent))
             WeaponSkinTypes = new(reader, CostumeTypes);
 
         string itemTypesContent = data[ITEM_TYPES];
-        using (SepReader reader = readerFromText(itemTypesContent))
+        using (SepReader reader = CsvReadUtils.ReaderFromText(itemTypesContent))
             ItemTypes = new(reader);
 
         string spawnBotTypesContent = data[SPAWN_BOT_TYPES];
@@ -192,7 +231,7 @@ public sealed class SwzGameFile
         PlayerThemeTypes = new(playerThemeTypesElement);
 
         string avatarTypesContent = data[AVATAR_TYPES];
-        using (SepReader reader = readerFromText(avatarTypesContent))
+        using (SepReader reader = CsvReadUtils.ReaderFromText(avatarTypesContent))
             AvatarTypes = new(reader);
 
         if (data.TryGetFile(EMOJI_TYPES, out string? emojiTypesContent))
@@ -216,18 +255,18 @@ public sealed class SwzGameFile
         ColorSchemeTypes = new(colorSchemeElement);
 
         string colorExceptionTypesContent = data[COLOR_EXCEPTION_TYPES];
-        using (SepReader reader = readerFromText(colorExceptionTypesContent))
+        using (SepReader reader = CsvReadUtils.ReaderFromText(colorExceptionTypesContent))
             ColorExceptionTypes = new(reader);
 
         SpriteData = new();
         if (data.TryGetFile(SPRITE_DATA, out string? spriteDataContent))
         {
-            using SepReader reader = readerFromText(spriteDataContent);
+            using SepReader reader = CsvReadUtils.ReaderFromText(spriteDataContent);
             SpriteData.ApplySpriteData(reader);
         }
         if (data.TryGetFile(MANUAL_BONE_SPRITE_DATA, out string? manualBoneSpriteDataContent))
         {
-            using SepReader reader = readerFromText(manualBoneSpriteDataContent);
+            using SepReader reader = CsvReadUtils.ReaderFromText(manualBoneSpriteDataContent);
             SpriteData.ApplySpriteData(reader);
         }
     }
@@ -240,5 +279,20 @@ public sealed class SwzGameFile
     public static async Task<SwzGameFile> NewAsync(string filePath, uint key, CancellationToken cancellationToken = default)
     {
         return new(await SwzFileData.NewAsync(filePath, key, TO_READ, cancellationToken));
+    }
+}
+
+static class CsvReadUtils
+{
+    public static SepReader ReaderFromText(string text)
+    {
+        StringReader textReader = new(text);
+        textReader.ReadLine(); // skip first line bullshit
+        SepReaderOptions reader = Sep.New(',').Reader((opts) => opts with
+        {
+            DisableColCountCheck = true,
+            Unescape = true,
+        });
+        return reader.From(textReader);
     }
 }

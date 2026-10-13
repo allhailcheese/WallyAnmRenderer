@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -24,15 +25,10 @@ public sealed class Loader : ILoader
     private CancellationTokenSource? _loadLangToken = null;
     private Task<BoneDatabase>? _boneDatabase = null;
 
-    private string _brawlPath;
     public string BrawlPath
     {
         get => AssetLoader.BrawlPath;
-        set
-        {
-            _brawlPath = value;
-            AssetLoader.BrawlPath = value;
-        }
+        set => AssetLoader.BrawlPath = value;
     }
 
     public uint Key { get; set; }
@@ -43,16 +39,35 @@ public sealed class Loader : ILoader
 
     public Loader(string brawlPath, uint key)
     {
-        _brawlPath = brawlPath;
-        Key = key;
-
         AssetLoader = new(brawlPath);
+        Key = key;
     }
 
     public async Task LoadFilesAsync(CancellationToken cancellationToken = default)
     {
         await LoadSwzAsync(cancellationToken);
-        await LoadLangAsync(cancellationToken);
+        try
+        {
+            await LoadLangAsync(cancellationToken);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            // lang loading failed, we might be in an older version. try load from swz.
+            void merge(LangFile? lang)
+            {
+                if (lang is null || lang.Entries.Count == 0)
+                    return;
+                LangFile ??= new() { Header = 0, Entries = [] };
+                foreach ((string key, string text) in lang.Entries)
+                    LangFile.Entries[key] = text;
+            }
+            merge(SwzFiles?.Engine?.StringTable);
+            merge(SwzFiles?.Init?.LoreStringTable);
+
+            // was not present in swz, rethrow
+            if (LangFile is null)
+                throw;
+        }
     }
 
     public async Task LoadSwzAsync(CancellationToken cancellationToken = default)
@@ -60,7 +75,7 @@ public sealed class Loader : ILoader
         CancelLoadSwz();
         CancellationTokenSource source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _loadSwzToken = source;
-        SwzFiles = await SwzFiles.NewAsync(_brawlPath, Key, source.Token);
+        SwzFiles = await SwzFiles.NewAsync(BrawlPath, Key, source.Token);
     }
 
     public async Task LoadLangAsync(CancellationToken cancellationToken = default)
@@ -68,7 +83,7 @@ public sealed class Loader : ILoader
         CancelLoadLang();
         CancellationTokenSource source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _loadLangToken = source;
-        LangFile = await LangFile.LoadAsync(Path.Join(_brawlPath, "languages", "language.1.bin"), source.Token);
+        LangFile = await LangFile.LoadAsync(Path.Join(BrawlPath, "languages", "language.1.bin"), source.Token);
     }
 
     private void CancelLoadSwz()
@@ -87,7 +102,7 @@ public sealed class Loader : ILoader
 
     public bool SwfExists(string swfPath)
     {
-        return File.Exists(Path.Join(_brawlPath, swfPath));
+        return File.Exists(Path.Join(BrawlPath, swfPath));
     }
 
     public ValueTask<IAnmClass?> GetAnmClass(string classIdentifier)

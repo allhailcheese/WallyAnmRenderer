@@ -6,6 +6,7 @@ namespace WallyAnmRenderer;
 
 public sealed class SwzFiles
 {
+    private const string ENGINE_SWZ = "Engine.swz";
     private const string INIT_SWZ = "Init.swz";
     private const string GAME_SWZ = "Game.swz";
 
@@ -51,17 +52,24 @@ public sealed class SwzFiles
         return result;
     }
 
+    public SwzEngineFile? Engine { get; private set; }
     public SwzInitFile? Init { get; private set; }
     public SwzGameFile? Game { get; private set; }
 
     public void LoadSwzFiles()
     {
+        Engine = SwzEngineFile.New(Path.Combine(_brawlPath, ENGINE_SWZ), _key);
         Init = SwzInitFile.New(Path.Combine(_brawlPath, INIT_SWZ), _key);
         Game = SwzGameFile.New(Path.Combine(_brawlPath, GAME_SWZ), _key);
     }
 
     public async Task LoadSwzFilesAsync(CancellationToken cancellationToken = default)
     {
+        async Task LoadEngine(CancellationToken cancellationToken = default)
+        {
+            Engine = await SwzEngineFile.NewAsync(Path.Combine(_brawlPath, ENGINE_SWZ), _key, cancellationToken);
+        }
+
         async Task LoadInit(CancellationToken cancellationToken = default)
         {
             Init = await SwzInitFile.NewAsync(Path.Combine(_brawlPath, INIT_SWZ), _key, cancellationToken);
@@ -72,6 +80,6 @@ public sealed class SwzFiles
             Game = await SwzGameFile.NewAsync(Path.Combine(_brawlPath, GAME_SWZ), _key, cancellationToken);
         }
 
-        await Task.WhenAll(LoadInit(cancellationToken), LoadGame(cancellationToken));
+        await Task.WhenAll(LoadEngine(cancellationToken), LoadInit(cancellationToken), LoadGame(cancellationToken));
     }
 }
